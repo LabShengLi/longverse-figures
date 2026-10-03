@@ -1,0 +1,16 @@
+{
+ "phasing_tools_only": {
+  "job_id": "6082076",
+  "slurm_state": "COMPLETED",
+  "minutes": 22.7,
+  "tasks_completed": 14,
+  "tasks_total": 14
+ },
+ "phasing_mcp_prompt": {
+  "job_id": "6082257",
+  "slurm_state": "COMPLETED",
+  "minutes": 31.4,
+  "tasks_completed": 14,
+  "tasks_total": 14
+ }
+}

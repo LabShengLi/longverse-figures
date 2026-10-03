@@ -1,0 +1,21 @@
+{
+  "font_used": "Arial",
+  "human": "human_upstream",
+  "agents": [
+    "agent_mcp_prompt"
+  ],
+  "tss_profile": {
+    "agent_mcp_prompt": {
+      "n_bins": 80,
+      "pearson_r": 1.0,
+      "rms_difference": 2.24e-06,
+      "max_abs_difference": 1e-05
+    }
+  },
+  "wgbs_by_coverage": {
+    "agent_mcp_prompt": {
+      "bins": 7,
+      "max_abs_PCC_difference": 2.92e-06
+    }
+  }
+}

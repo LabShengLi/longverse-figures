@@ -1,0 +1,15 @@
+nextflow -log "$ROOT/launch/nextflow.log" run "$REPO" \
+    -profile singularity,hpc \
+    --dsname hg002_ont_chr20_ph2 \
+    --input "$ROOT/input" --input_bam true --file_format bam \
+    --genome $HOME_DIR/reference/chm13v2.0 \
+    --gpu_queue lilab --cpu_queue lilab --account sli68423_1316 \
+    --gpu_gresOptions 'gpu:1' \
+    --containerOptions '--nv -B /scratch1 -B /project2 -B $LONGVERSE/hpc_test/analysis_claude/agent_benchmark/ps_shim.sh:/usr/bin/ps' \
+    --phasing \
+    --chrSet chr20 --ctg_name chr20 \
+    --cpu_memory 350.GB --cpu_processors 16 --cpu_time 14.d --gpu_time 14.d \
+    -with-trace "$ROOT/launch/trace.txt" \
+    -with-report "$ROOT/launch/report.html" \
+    -with-timeline "$ROOT/launch/timeline.html" \
+    -with-dag "$ROOT/launch/dag.html"

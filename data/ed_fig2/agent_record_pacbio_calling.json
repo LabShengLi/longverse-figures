@@ -1,0 +1,33 @@
+{
+  "task": "pacbio_calling",
+  "arm": "agent_pacbio_calling",
+  "figure": "Supp Fig 3",
+  "request": "Call CpG methylation on the PacBio HiFi data for chromosome 20. Compose the pipeline command; do not run anything else.",
+  "model": "claude-sonnet-4-5",
+  "steps": [
+    {
+      "proposed": [
+        {
+          "tool": "longverse_build_run_command"
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "steps": 4,
+    "wall_seconds": 37.0,
+    "cost_usd": 0.20167010000000002,
+    "input_tokens": 36,
+    "output_tokens": 1573,
+    "thinking_tokens": 659
+  },
+  "launched": {
+    "job_id": "6240746",
+    "note": "the composed command (agent_argv.json) was executed by the scripted MCP client in Slurm job 6240746; results under supp3_agent/launch"
+  },
+  "source": {
+    "session": "$RESULTS/2026_10_02_pacbio_agent_cost/agent_pacbio_calling/session.json",
+    "row": "$RESULTS/2026_10_02_pacbio_agent_cost/agent_pacbio_calling/row.json",
+    "tools_from": "session.json permission_denials (head-less CLI refuses tool calls; the chosen tool and its arguments are recorded there and executed by the scripted client)"
+  }
+}

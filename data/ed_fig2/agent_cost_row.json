@@ -1,0 +1,15 @@
+{
+  "run_id": "pacbio_calling",
+  "figure": "Supp Fig 3",
+  "model": "claude-sonnet-4-5",
+  "num_turns": 4,
+  "input_tokens": 36,
+  "output_tokens": 1573,
+  "thinking_tokens": 659,
+  "cache_creation_input_tokens": 25736,
+  "cache_read_input_tokens": 74537,
+  "cost_usd": 0.20167010000000002,
+  "duration_ms": 28130,
+  "wall_seconds": 37.0,
+  "is_error": false
+}

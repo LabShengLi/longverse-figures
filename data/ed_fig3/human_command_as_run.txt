@@ -1,0 +1,14 @@
+nextflow -log $RESULTS/2026_10_02_suppfig34_pacbio_chr20/supp4_human/launch/nextflow.log run $LONGVERSE \
+    -profile singularity \
+    --dsname supp4_human \
+    --input $RESULTS/2026_10_02_suppfig34_pacbio_chr20/input/supp4_mmml --genome $HOME_DIR/reference/chm13v2.0/chm13v2.0.fa \
+    --platform pacbio --ecosystem jasmine \
+    --file_format bam \
+    --chrSet chr20 --ctg_name chr20 \
+    --clair3_platform hifi --CLAIR3_MODEL_NAME hifi_sequel2 \
+    --processors 8 --processMemory '16 GB' \
+    --containerOptions "-B $RESULTS/2026_10_02_suppfig34_pacbio_chr20 -B $HOME_DIR/reference/chm13v2.0 -B /project2 -B /scratch2" \
+    --outdir $RESULTS/2026_10_02_suppfig34_pacbio_chr20/supp4_human/results \
+    -with-trace $RESULTS/2026_10_02_suppfig34_pacbio_chr20/supp4_human/launch/trace.txt \
+    --input_bam true --phasing true
+# Reconstructed from run_human() in chr20_gnas_testset/22_suppfig34_pacbio_human_vs_agent.sbatch with T, REPO, REF substituted and the supp4 extra args; job 6239962, 2026-10-02 17:45 UTC

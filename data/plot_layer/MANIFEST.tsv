@@ -1,0 +1,14 @@
+file	rows_drawn	rows_in_source	note
+hexbin/ed4_a_ont_vs_wgbs.csv.gz	11141	56629251	x=WGBS y=ONT
+hexbin/ed4_b_pacbio_vs_wgbs.csv.gz	11036	56723220	x=WGBS y=PacBio
+hexbin/ed4_c_ont_vs_pacbio.csv.gz	10950	62100976	x=PacBio y=ONT
+hexbin/ed5_f_Promoter.csv.gz	10323	8501361	x=PacBio y=ONT, scaled to 0-100
+hexbin/ed5_f_5UTR.csv.gz	7581	202270	x=PacBio y=ONT, scaled to 0-100
+hexbin/ed5_f_3UTR.csv.gz	8940	972240	x=PacBio y=ONT, scaled to 0-100
+hexbin/ed5_f_Exon.csv.gz	9664	2141766	x=PacBio y=ONT, scaled to 0-100
+hexbin/ed5_f_Intron.csv.gz	10508	25250741	x=PacBio y=ONT, scaled to 0-100
+hexbin/ed5_f_Intergenic.csv.gz	10668	24263532	x=PacBio y=ONT, scaled to 0-100
+hexbin/ed5_f_Island.csv.gz	10035	4698350	x=PacBio y=ONT, scaled to 0-100
+hexbin/ed5_f_NonIsland.csv.gz	10794	56633560	x=PacBio y=ONT, scaled to 0-100
+ideogram/ed4_d_ont.csv.gz	45339	2614858	|meth.diff| >= 50.0, qvalue <= 0.01
+ideogram/ed4_e_pacbio.csv.gz	21609	2669209	|meth.diff| >= 50.0, qvalue <= 0.01

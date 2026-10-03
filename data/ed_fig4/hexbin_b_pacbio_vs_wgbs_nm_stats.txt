@@ -1,0 +1,21 @@
+# Per-site comparison summary
+input_bed1	$SCRATCH/pacbio_rerun/pipeline/work/05_meth_all/Site_Level-hg002_pacbio_kinetics_all4_t2t_all/hg002_pacbio_kinetics_all4_t2t_all_PB_JASMINE-perSite-cov1.sort.bed.gz
+input_bed2	$RESULTS/2026_10_02_fig2ab_jasmine_panels/inputs/hg002_wgbs_bismark_t2t-perSite.bed.gz
+group1_y_axis	PacBio
+group2_x_axis	WGBS
+min_coverage_bed1	5
+min_coverage_bed2	5
+sites_bed1_total	65314640
+sites_bed2_total	62870221
+sites_overlap_before_cov_filter	60377107
+n_data_points	56723220
+
+# Methylation frequency (%%)
+pearson_r	0.8914857828541145
+pearson_p_value	0.0
+
+# Coverage
+pearson_r	0.15554302008408535
+pearson_p_value	0.0
+
+coverage_plot_axis_max	77.0

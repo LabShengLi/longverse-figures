@@ -1,0 +1,21 @@
+# Per-site comparison summary
+input_bed1	$RESULTS/2026_05_14_run_longverse_ont_hg002_t2t/results/hg002_ont_t2t-methylation-callings/Site_Level-hg002_ont_t2t_all/hg002_ont_t2t_all_Dorado-perSite-cov1.sort.bed.gz
+input_bed2	$SCRATCH/pacbio_rerun/pipeline/work/05_meth_all/Site_Level-hg002_pacbio_kinetics_all4_t2t_all/hg002_pacbio_kinetics_all4_t2t_all_PB_JASMINE-perSite-cov1.sort.bed.gz
+group1_y_axis	ONT
+group2_x_axis	PacBio
+min_coverage_bed1	5
+min_coverage_bed2	5
+sites_bed1_total	65801544
+sites_bed2_total	65314640
+sites_overlap_before_cov_filter	64655169
+n_data_points	62100976
+
+# Methylation frequency (%%)
+pearson_r	0.8815810631327509
+pearson_p_value	0.0
+
+# Coverage
+pearson_r	0.824512195492757
+pearson_p_value	0.0
+
+coverage_plot_axis_max	59.0

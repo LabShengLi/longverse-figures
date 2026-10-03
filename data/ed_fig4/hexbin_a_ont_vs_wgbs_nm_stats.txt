@@ -1,0 +1,21 @@
+# Per-site comparison summary
+input_bed1	$RESULTS/2026_05_14_run_longverse_ont_hg002_t2t/results/hg002_ont_t2t-methylation-callings/Site_Level-hg002_ont_t2t_all/hg002_ont_t2t_all_Dorado-perSite-cov1.sort.bed.gz
+input_bed2	$RESULTS/2026_10_02_fig2ab_jasmine_panels/inputs/hg002_wgbs_bismark_t2t-perSite.bed.gz
+group1_y_axis	ONT
+group2_x_axis	WGBS
+min_coverage_bed1	5
+min_coverage_bed2	5
+sites_bed1_total	65801544
+sites_bed2_total	62870221
+sites_overlap_before_cov_filter	60593360
+n_data_points	56629251
+
+# Methylation frequency (%%)
+pearson_r	0.9526664136925841
+pearson_p_value	0.0
+
+# Coverage
+pearson_r	0.18113820627164898
+pearson_p_value	0.0
+
+coverage_plot_axis_max	77.0

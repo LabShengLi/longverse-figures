@@ -1,0 +1,7 @@
+metric	count
+min_cov	5
+ONT_total	63130991
+PacBio_total	63617062
+overlap	62100976
+ONT_only	1030015
+PacBio_only	1516086

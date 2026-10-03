@@ -1,0 +1,17 @@
+# Binder builds from this file. Pure Python on purpose: the paper's ideograms and
+# heatmaps were drawn in R (karyoploteR, ComplexHeatmap), but installing those on
+# mybinder takes ten to twenty minutes and fails often enough to matter. Every panel
+# here is redrawn in matplotlib from the same exported numbers, so the figures are
+# equivalent rather than byte-identical, and the environment builds in about a minute.
+name: longverse-figures
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - matplotlib=3.8
+  - pandas=2.2
+  - numpy=1.26
+  - scipy=1.13
+  - matplotlib-venn=0.11
+  - jupyterlab=4.2
+  - pip

@@ -1,0 +1,1 @@
+Call CpG methylation on the PacBio HiFi data for chromosome 20. Compose the pipeline command; do not run anything else.

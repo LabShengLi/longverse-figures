@@ -1,0 +1,9 @@
+#!/bin/bash
+# Register Arial if the image happens to carry it; the panels fall back to DejaVu Sans
+# otherwise. Nothing here may fail the build, hence the trailing true.
+set -e
+python - <<'PY' || true
+import matplotlib.font_manager as fm
+names = {f.name for f in fm.fontManager.ttflist}
+print("Arial available:" , "Arial" in names)
+PY

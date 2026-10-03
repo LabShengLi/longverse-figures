@@ -1,0 +1,33 @@
+{
+  "task": "pacbio_phasing",
+  "arm": "agent_pacbio_phasing",
+  "figure": "Supp Fig 4",
+  "request": "Phase the PacBio reads for chromosome 20 and give me methylation per haplotype. Compose the pipeline command; do not run anything else.",
+  "model": "claude-sonnet-4-5",
+  "steps": [
+    {
+      "proposed": [
+        {
+          "tool": "longverse_build_run_command"
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "steps": 3,
+    "wall_seconds": 27.9,
+    "cost_usd": 0.1212485,
+    "input_tokens": 28,
+    "output_tokens": 1170,
+    "thinking_tokens": 520
+  },
+  "launched": {
+    "job_id": "6242229",
+    "note": "the composed command (agent_argv.json) was executed by the scripted MCP client in Slurm job 6242229; results under supp4_agent/launch"
+  },
+  "source": {
+    "session": "$RESULTS/2026_10_02_pacbio_agent_cost/agent_pacbio_phasing/session.json",
+    "row": "$RESULTS/2026_10_02_pacbio_agent_cost/agent_pacbio_phasing/row.json",
+    "tools_from": "session.json permission_denials"
+  }
+}

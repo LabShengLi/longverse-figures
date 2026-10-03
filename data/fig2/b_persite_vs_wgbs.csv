@@ -1,0 +1,4 @@
+comparison,pearson_r,p_value,n_sites,min_cov_longread,wgbs_filter,strands
+human_vs_wgbs,0.942923,0.000e+00,1540012,5,none,not_merged
+agent_vs_wgbs,0.942923,0.000e+00,1540012,5,none,not_merged
+human_vs_agent,1.000000,0.000e+00,1575278,5,none,not_merged

@@ -1,0 +1,1 @@
+Phase the PacBio reads for chromosome 20 and give me methylation per haplotype. Compose the pipeline command; do not run anything else.
