@@ -1,112 +1,85 @@
 # LongVerse figures
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/LabShengLi/longverse-figures/main?urlpath=lab/tree/notebooks/00_all_figures.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/LabShengLi/longverse-figures/main?urlpath=lab/tree/notebooks)
 
-Click the badge. A JupyterLab opens in your browser, already set up. Choose
-**Run -> Run All Cells** and every figure in the paper is drawn in front of you, by the
-code that drew it for the paper.
+The figures from *LongVerse: one sentence to the allele-specific methylome, verified
+multi-agent AI for Nanopore and PacBio long-read sequencing*, with the code that draws them
+and the numbers they are drawn from.
 
-No download, no install, no account. The first launch builds the image and takes ten to
-fifteen minutes, because the four R panels need real Bioconductor packages; after that it
-starts in about half a minute.
-
-Figures for *LongVerse: one sentence to the allele-specific methylome, verified multi-agent
-AI for Nanopore and PacBio long-read sequencing.*
+Click the badge and a JupyterLab opens in your browser with everything installed. Open a
+notebook and run it. Nothing to download, no account. The first launch builds the image and
+takes ten to fifteen minutes; after that it starts in about half a minute.
 
 ---
 
-## This runs the paper's code, not a lookalike
+## Contents
 
-`scripts/paper/` holds twenty-one scripts copied from the paper's repository **verbatim**,
-with one edit each: a hard-coded cluster path becomes an environment variable.
+    notebooks/     one per figure: the code in the cell, the panel underneath
+    scripts/paper/ the panel scripts, as they are in the paper's repository
+    data/          what each panel draws, 128 MB
+    figures/       where a run writes its PDFs and PNGs
 
-    ENS = Path("/project2/.../2026_09_28_ensemble_chr22")
-    ENS = Path(os.environ.get("LV_ENS", "/project2/.../2026_09_28_ensemble_chr22"))
-
-That is the whole change, and it is checked: the vendoring script diffs each copy against
-its source and refuses any line that differs for another reason.
-
-This matters because the first version of this repository did not do it. The panels were
-redrawn by eye from the exported numbers, and Figure 1e came back without its error half
-and without the value labels on its bars, Figure 1f without its gain panel. Redrawing from
-a description does not converge on the original.
-
-`figures/RENDER_LOG.tsv` names, for every panel, which script drew it.
-
-## One notebook per figure, the code in the cell
-
-`notebooks/01_figure1.ipynb` through `08_gnas_region.ipynb`: one per figure, a cell per
-panel. The cell holds the paper's code and the panel appears underneath it. Edit a line and
-re-run and you get your edit, which is the point of opening a notebook rather than a PDF.
-
-The four R panels are R cells, not Python strings holding R. `rpy2`'s `%%R` magic runs them
-natively in the same kernel, so the code is highlighted, editable and runs as R. One line in
-each differs from the file on disk: the paper's scripts read their arguments with
-`commandArgs(trailingOnly = TRUE)` and a notebook has no command line, so that line becomes
-the vector it would have produced. The substitution is marked in the cell.
-
-The cells are generated from `scripts/paper/`, never typed. `python scripts/build_notebooks.py
---check` verifies they still agree with it, which is how the first version's drift would
-have been caught.
-
-`00_all_figures.ipynb` is different: it calls `scripts/render_all.py` instead of re-running
-every cell. Under rpy2 all the R cells share one R session, while the paper's scripts each
-run in a fresh R process; running them together in one session let one leave a variable the
-next tripped over. The driver starts a process per script, so it is the faithful way to draw
-everything at once.
-
-## Why the repository is small
-
-The figures are computed from whole-genome data: 60 million CpG sites per platform, BAMs in
-the hundreds of gigabytes. Almost none of that is needed to *draw* them.
-
-| what a panel needs | size |
+| notebook | figure |
 | --- | --- |
-| per-run evaluation records, which hold the profiles and the costs | 23 to 33 KB each |
-| the three-caller consensus tables | 1 to 2 KB |
-| the imprinting tables | 19 KB |
-| phased reads at the imprinting regions, for the region plots | 116 MB |
-| the T2T annotation over those regions | 777 KB of 753 MB |
+| `01_figure1` | Fig. 1e, f - three callers and their consensus |
+| `02_figure2` | Fig. 2a, b, c - one sentence reproduces the expert, ONT |
+| `03_extended_data_fig1` | ED Fig. 1 - the remaining ONT panels |
+| `04_extended_data_fig2` | ED Fig. 2 - PacBio calling |
+| `05_extended_data_fig3` | ED Fig. 3 - PacBio phasing |
+| `06_extended_data_fig4` | ED Fig. 4 - ONT, PacBio and WGBS across the genome |
+| `07_extended_data_fig5` | ED Fig. 5 - coverage and regional agreement |
+| `08_gnas_region` | GNAS, per haplotype |
+| `00_all_figures` | draws everything in one go |
 
-The read slice is the one piece that had to be made rather than found. The ninety
-imprinting control regions span 1.02 Mb once padded, which is 0.005 percent of the genome,
-so the phased BAMs go from 85 GB and 53 GB to 38 and 19 MB per haplotype. Base quality
-strings are dropped: NanoMethViz reads the MM and ML tags, and keeping the qualities
-doubled the size for nothing.
+The notebooks are committed with their figures, so they can be read on GitHub without
+running anything.
 
-## The GNAS region plots depend on a source build
+## The code in the cells
 
-Figure 2c and Extended Data Fig. 1c are drawn by NanoMethViz. bioconda carries only 2.4.0,
-a major version behind the 3.2.0 the paper used, so `postBuild` installs it from
-Bioconductor instead. That is a source build with compiled dependencies, and it is the one
-step here that can fail on a machine this was not tested on: it did not complete on the
-cluster it was prepared on, where the conda compiler wrapper could not find its own
-backend.
+Each cell holds the script that drew that panel, taken from the paper's repository. Edit a
+line and re-run and you get your edit.
 
-So the notebook does not assume it. If NanoMethViz is present the panel is regenerated from
-the reads in `data/icr_bam/`; if it is not, the figure the paper's own run produced is
-shown instead, and `figures/RENDER_LOG.tsv` records which of the two happened on that run.
+The four R panels are R cells: `rpy2`'s `%%R` magic runs them in the same kernel as the
+Python ones. Each differs from its file by one line, marked where it happens, because the
+scripts read their arguments from a command line and a notebook has none.
 
-## The two panels that are not the paper's code
+Cells are generated from `scripts/paper/`, and `python scripts/build_notebooks.py --check`
+confirms they still match it.
 
-Everything else runs the paper's script. These two cannot, and the render log says so on
-their rows.
+## The data
 
-| panel | why | what is drawn instead |
-| --- | --- | --- |
-| ED Fig. 4a-c, whole-genome hexbins | the paper's script reads three 450 MB point tables | the ~11,000 hexagons its own `hexbin()` computed, exported once |
-| ED Fig. 5f, region hexbins | the paper's script loads RData objects up to 890 MB | the same, per region |
+Whole-genome inputs are not needed to draw a figure, so what is here is what each panel
+reads.
 
-The reduction is exact, not a sample: binning 202,270 sites returns hexagons whose counts
-sum to 202,270. What differs is the twenty lines that turn hexagons into a picture.
+| | |
+| --- | --- |
+| per-run evaluation records | 23 to 33 KB each |
+| consensus and imprinting tables | 1 to 19 KB |
+| phased reads at the imprinting regions | 116 MB |
+| T2T annotation over those regions | 777 KB |
+| exported hexagons and DMRs | 2.1 MB |
 
-## What is here
+The read slice was cut for this repository. The ninety imprinting control regions span
+1.02 Mb once padded, so the phased BAMs go from 85 GB and 53 GB to 38 and 19 MB per
+haplotype. Base qualities are dropped, since NanoMethViz reads the MM and ML tags.
 
-    data/          every number each panel draws, plus the imprinting-region reads
-    notebooks/     00_all_figures.ipynb
-    scripts/paper/ the paper's scripts, verbatim but for their roots
-    scripts/       render_all.py, which runs them; panels.py, for the two exported panels
-    figures/       where the PDFs and PNGs are written
+## Two panels drawn from exported values
+
+ED Fig. 4a-c and ED Fig. 5f are redrawn from the hexagons their own `hexbin()` call
+produced, exported once, because the scripts for them read 450 MB and 890 MB inputs. The
+binning is exact: 202,270 sites give hexagons whose counts sum to 202,270. Every other panel
+runs its script. `figures/RENDER_LOG.tsv` lists which is which.
+
+## GNAS
+
+`08_gnas_region` draws the region plots with NanoMethViz from `data/icr_bam/`. NanoMethViz
+comes from Bioconductor at build time, because bioconda has 2.4.0 against the 3.2.0 the
+paper used, and that source build does not always succeed.
+
+The committed outputs in that notebook are from a machine where it did not: the first cell
+reports NanoMethViz missing, the R cells carry their error, and the last cell shows the
+figures the paper's own run produced. Where the build works, the R cells draw the plots from
+the reads instead.
 
 ## Running it elsewhere
 
@@ -115,29 +88,23 @@ git clone https://github.com/LabShengLi/longverse-figures
 cd longverse-figures
 conda env create -f environment.yml
 conda activate longverse-figures
-bash postBuild                      # installs NanoMethViz from Bioconductor
-python scripts/render_all.py figures
+bash postBuild
+jupyter lab notebooks
 ```
 
-`render_all.py` runs R with `--vanilla` and pins `R_LIBS` to the environment's own library.
-That is deliberate: on the machine this was built on, a personal R library held a `stringi`
-compiled against a different ICU, and three of the four R panels failed to load. A reader's
-own R settings must not be able to change the paper's figures.
+R runs with `--vanilla` and `R_LIBS` pinned to the environment, so a personal R library
+cannot change what the figures look like.
 
-## Reproducing from reads instead
+## From reads instead
 
-This repository starts from what each panel draws. To start from raw signal, the published
-chromosome 20 GNAS test set is 33 MB and runs the whole pipeline in minutes:
+The published chromosome 20 GNAS test set is 33 MB and runs the pipeline end to end in
+minutes: Zenodo record 23090404, pipeline at <https://github.com/LabShengLi/longverse>.
 
-- data: Zenodo record 23090404
-- pipeline: <https://github.com/LabShengLi/longverse>
+## Notes
 
-## Notes on the data
+Command lines shown in Figure 2a have their paths rewritten to `$LONGVERSE` and `$RESULTS`;
+they were absolute paths on a shared filesystem. Figure 2a is native PowerPoint text in the
+paper, so the notebook prints its content rather than redrawing it.
 
-Command lines shown in Figure 2a have had their paths rewritten to `$LONGVERSE`, `$RESULTS`
-and similar. They were absolute paths on a shared HPC filesystem; the shape of the
-invocation is what the panel is about. Figure 2a itself is native PowerPoint text in the
-paper rather than an image, so the notebook prints its content instead of redrawing it.
-
-`data/plot_layer/MANIFEST.tsv` records, for each exported file, how many rows it draws and
-how many it was reduced from. `data/icr_bam/README.txt` records how the read slice was cut.
+`data/plot_layer/MANIFEST.tsv` records how many rows each exported file draws and how many
+it came from. `data/icr_bam/README.txt` records how the read slice was cut.
