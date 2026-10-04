@@ -6,3 +6,5 @@ phasing_tools_only,New Figure 3,phasing,tools_only,2,longverse_build_run_command
 upstream_mcp_prompt,New Figure 2,upstream,mcp_prompt,5,longverse_inspect_pod5 -> longverse_list_dorado_models -> longverse_build_run_command -> longverse_build_run_command -> longverse_launch_run,146,6955,3219,52489,334022,0.5359,140.5,0.0771,0.864
 upstream_tools_only,New Figure 2,upstream,tools_only,5,longverse_inspect_pod5 -> longverse_list_dorado_models -> longverse_build_run_command -> longverse_build_run_command -> longverse_launch_run,162,10249,4463,65563,369094,0.6737,183.4,0.0657,0.849
 upstream_with_prompt,New Figure 2,upstream,with_prompt,6,longverse_inspect_pod5 -> longverse_list_dorado_models -> longverse_build_run_command -> longverse_build_run_command -> longverse_build_run_command -> longverse_launch_run,200,10390,5042,65803,463229,0.7111,202.6,0.0684,0.876
+pacbio_calling,ED Fig. 2,,,,,18,1003,508,23586,22559,0.16454570000000002,22.8,,
+pacbio_phasing,ED Fig. 3,,,,,18,1121,499,12622,33515,0.1038195,24.2,,

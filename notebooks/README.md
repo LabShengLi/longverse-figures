@@ -6,7 +6,7 @@ and the panel it drew appears underneath.
 | notebook | figure |
 | --- | --- |
 | `01_figure1.ipynb` | Figure 1e, f |
-| `02_figure2.ipynb` | Figure 2a, b |
+| `02_figure2.ipynb` | Figure 2a, b, c |
 | `03_extended_data_fig1.ipynb` | ED Fig. 1a, b, c |
 | `04_extended_data_fig2.ipynb` | ED Fig. 2, PacBio calling |
 | `05_extended_data_fig3.ipynb` | ED Fig. 3, PacBio phasing |

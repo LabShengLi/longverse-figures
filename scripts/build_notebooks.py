@@ -280,6 +280,25 @@ show different panels from that run.""", [
  "is the measurement Extended Data Fig. 1a makes, both arms in one plot.",
  'show("panel_wgbs_by_coverage.png", prefix="fig2_ont")'),
 
+("## Figure 2b - the other plot in each arm's frame, a per-site hexbin\n\n"
+ "Every chromosome 20 site each arm called, against the bisulfite reference. The paper "
+ "runs this on the whole bisulfite table; here it is the chromosome 20 slice of it, 13 MB "
+ "instead of 515, which is the same sites because the arms only called chromosome 20.",
+ cell_script("make_hexbin_panel.py",
+             ["{DATA}/hexbin_chr20/ont_human_chr20_persite_cov1.bed.gz",
+              "{DATA}/hexbin_chr20/ont_agent_chr20_persite_cov1.bed.gz",
+              "{DATA}/hexbin_chr20/wgbs_chr20.bismark.cov.gz", "{OUT}"],
+             ["panel_hexbin_human_vs_wgbs.png", "panel_hexbin_agent_vs_wgbs.png"])),
+
+("## Figure 2c - GNAS per haplotype, the expert's run\n\n"
+ "NanoMethViz on that arm's own phased reads, cut to the window the panel draws. The "
+ "whole phased BAMs are 1.8 GB per haplotype; this window is 25 kb.",
+ cell_rsource_argparser("modbam_region_plot.R", ["--hp1_bam", "../data/gnas_arms/fig2c_ont_human_HP1.bam", "--hp2_bam", "../data/gnas_arms/fig2c_ont_human_HP2.bam", "--chr", "chr20", "--start", "60622123", "--end", "60626697", "--flank", "3000", "--gtf_file", "../data/icr_bam/hs1.ncbiRefSeq.icr.gtf", "--outdir", "../figures/notebook", "--outfn_prefix", "fig2c_human", "--tagname", "GNAS", "--fig_w", "7", "--fig_h", "6", "--png"], {}, ["fig2c_human_GNAS.png"])),
+
+("## Figure 2c - the same window, the agent's run\n\n"
+ "Same script, same window, the other arm's reads.",
+ cell_rsource_argparser("modbam_region_plot.R", ["--hp1_bam", "../data/gnas_arms/fig2c_ont_agent_HP1.bam", "--hp2_bam", "../data/gnas_arms/fig2c_ont_agent_HP2.bam", "--chr", "chr20", "--start", "60622123", "--end", "60626697", "--flank", "3000", "--gtf_file", "../data/icr_bam/hs1.ncbiRefSeq.icr.gtf", "--outdir", "../figures/notebook", "--outfn_prefix", "fig2c_agent", "--tagname", "GNAS", "--fig_w", "7", "--fig_h", "6", "--png"], {}, ["fig2c_agent_GNAS.png"])),
+
 ("## Figure 2a - what the two arms were given\n\n"
  "In the paper this panel is native PowerPoint text, so the commands stay selectable. "
  "There is no image to regenerate; its content is below, from the same records.",
@@ -348,17 +367,46 @@ here with the PacBio labels.""", [
 ("## b - agreement with the bisulfite reference by read depth\n\n"
  "Another panel from the same pass as the cell above.",
  'show("panel_wgbs_by_coverage.png", prefix="ed2")'),
+
+("## b - the per-site hexbins, the other plot in each arm's frame",
+ 'import os\nos.environ["PANEL_PLATFORM"] = "PacBio"\n\n'
+ + cell_script("make_hexbin_panel.py",
+               ["{DATA}/hexbin_chr20/pacbio_human_chr20_persite_cov1.bed.gz",
+                "{DATA}/hexbin_chr20/pacbio_agent_chr20_persite_cov1.bed.gz",
+                "{DATA}/hexbin_chr20/wgbs_chr20.bismark.cov.gz", "{OUT}"],
+               ["panel_hexbin_human_vs_wgbs.png", "panel_hexbin_agent_vs_wgbs.png"])),
+
+("## a - what the agent consumed on this run",
+ cell_script("make_cost_panel.py", ["ed2_cost", "pacbio_calling"],
+             ["panel_agent_cost.png"], prefix="ed2_cost", harvest_as="ed2_cost")),
 ]),
 
 "05_extended_data_fig3": ("""# Extended Data Fig. 3
 
-PacBio phasing and per-haplotype methylation.""", [
+PacBio phasing and per-haplotype methylation, the expert's run against the agent's.""", [
 
 ("## The two PacBio phasing arms\n\n"
  "The same script again, on the phasing arms.",
  'import os\nos.environ["PANEL_PLATFORM"] = "PacBio"\n\n'
  + cell_script("make_panels.py", ["figure3", "supp4_human", "supp4_agent"],
                ["panel_icr_haplotype.png"], prefix="ed3", harvest_as="ed3")),
+
+("## a - what the agent consumed on this run",
+ cell_script("make_cost_panel.py", ["ed3_cost", "pacbio_phasing"],
+             ["panel_agent_cost.png"], prefix="ed3_cost", harvest_as="ed3_cost")),
+
+("## b - the imprinting control regions on chromosome 20, one plot per arm\n\n"
+ "Two per-region tables of 576 bytes, one from each arm's own phasing run.",
+ cell_script("make_icr_panel.py",
+             ["{DATA}/ed_fig3/b_icr_human_phasing.csv",
+              "{DATA}/ed_fig3/b_icr_agent_phasing.csv", "{OUT}"],
+             ["panel_icr_human.png", "panel_icr_agent.png"])),
+
+("## b - GNAS per haplotype, the expert's run",
+ cell_rsource_argparser("modbam_region_plot.R", ["--hp1_bam", "../data/gnas_arms/ed3b_pacbio_human_HP1.bam", "--hp2_bam", "../data/gnas_arms/ed3b_pacbio_human_HP2.bam", "--chr", "chr20", "--start", "60622123", "--end", "60626697", "--flank", "3000", "--gtf_file", "../data/icr_bam/hs1.ncbiRefSeq.icr.gtf", "--outdir", "../figures/notebook", "--outfn_prefix", "ed3b_human", "--tagname", "GNAS", "--fig_w", "7", "--fig_h", "6", "--png"], {}, ["ed3b_human_GNAS.png"])),
+
+("## b - the same window, the agent's run",
+ cell_rsource_argparser("modbam_region_plot.R", ["--hp1_bam", "../data/gnas_arms/ed3b_pacbio_agent_HP1.bam", "--hp2_bam", "../data/gnas_arms/ed3b_pacbio_agent_HP2.bam", "--chr", "chr20", "--start", "60622123", "--end", "60626697", "--flank", "3000", "--gtf_file", "../data/icr_bam/hs1.ncbiRefSeq.icr.gtf", "--outdir", "../figures/notebook", "--outfn_prefix", "ed3b_agent", "--tagname", "GNAS", "--fig_w", "7", "--fig_h", "6", "--png"], {}, ["ed3b_agent_GNAS.png"])),
 ]),
 
 "06_extended_data_fig4": ("""# Extended Data Fig. 4
@@ -515,7 +563,7 @@ and the panel it drew appears underneath.
 | notebook | figure |
 | --- | --- |
 | `01_figure1.ipynb` | Figure 1e, f |
-| `02_figure2.ipynb` | Figure 2a, b |
+| `02_figure2.ipynb` | Figure 2a, b, c |
 | `03_extended_data_fig1.ipynb` | ED Fig. 1a, b, c |
 | `04_extended_data_fig2.ipynb` | ED Fig. 2, PacBio calling |
 | `05_extended_data_fig3.ipynb` | ED Fig. 3, PacBio phasing |

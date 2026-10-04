@@ -23,10 +23,10 @@ takes ten to fifteen minutes; after that it starts in about half a minute.
 | notebook | figure |
 | --- | --- |
 | `01_figure1` | Fig. 1e, f - three callers and their consensus |
-| `02_figure2` | Fig. 2a, b - one sentence reproduces the expert, ONT |
+| `02_figure2` | Fig. 2a, b, c - one sentence reproduces the expert, ONT |
 | `03_extended_data_fig1` | ED Fig. 1a, b, c - the remaining ONT panels |
-| `04_extended_data_fig2` | ED Fig. 2 - PacBio calling |
-| `05_extended_data_fig3` | ED Fig. 3 - PacBio phasing |
+| `04_extended_data_fig2` | ED Fig. 2a, b - PacBio calling |
+| `05_extended_data_fig3` | ED Fig. 3a, b - PacBio phasing |
 | `06_extended_data_fig4` | ED Fig. 4a-e - ONT, PacBio and WGBS across the genome |
 | `07_extended_data_fig5` | ED Fig. 5a-h - coverage, imprinting and regional agreement |
 | `08_gnas_region` | the region plot behind Fig. 2c - GNAS, per haplotype |
@@ -70,13 +70,15 @@ versions of a panel with both arms in one plot, where the paper draws one arm at
 ## The data
 
 Whole-genome inputs are not needed to draw a figure, so what is here is what each panel
-reads.
+reads, 196 MB in all.
 
 | | |
 | --- | --- |
 | per-run evaluation records | 23 to 33 KB each |
-| consensus and imprinting tables | 1 to 19 KB |
+| consensus and imprinting tables | 0.6 to 19 KB |
 | phased reads at the imprinting regions | 116 MB |
+| phased reads at GNAS, one pair per arm | 2.9 MB |
+| chromosome 20 per-site calls, four arms, and the bisulfite slice | 66 MB |
 | T2T annotation over those regions | 777 KB |
 | exported hexagons and DMRs | 2.1 MB |
 

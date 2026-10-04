@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import time
 import subprocess
 import sys
 from pathlib import Path
@@ -105,6 +106,26 @@ def harvest(prefix: str, out: Path) -> int:
     return n
 
 
+def collect(stage: Path, prefix: str, out: Path) -> int:
+    """Move a staged run's output into out/ under a prefix.
+
+    Two runs of make_hexbin_panel.py, and two of make_icr_panel.py, write the same file
+    names: one pair is ONT and the other PacBio, one pair is Extended Data Fig. 1c and the
+    other 3b. Each is given its own directory and the files are moved out under a prefix
+    rather than the script being asked to name them differently, which would be an edit to
+    the paper's code.
+    """
+    n = 0
+    for f in sorted(stage.glob("*")):
+        if f.suffix in (".png", ".pdf"):
+            f.replace(out / f"{prefix}{f.name}")
+            n += 1
+    for f in sorted(stage.glob("*")):
+        f.unlink()
+    stage.rmdir()
+    return n
+
+
 def rscript(panel: str, script: str, args: list[str], env: dict | None = None):
     def run():
         e = dict(os.environ)
@@ -148,6 +169,10 @@ FIGURE_PANELS: dict[str, tuple[str, str, str]] = {
 
     "fig2_ont_panel_tss_human":          ("Fig. 2", "b", "fig2b_human_tss_profile"),
     "fig2_ont_panel_tss_agent":          ("Fig. 2", "b", "fig2b_agent_tss_profile"),
+    "fig2_ont_panel_hexbin_human_vs_wgbs": ("Fig. 2", "b", "fig2b_human_hexbin_vs_wgbs"),
+    "fig2_ont_panel_hexbin_agent_vs_wgbs": ("Fig. 2", "b", "fig2b_agent_hexbin_vs_wgbs"),
+    "fig2c_human_GNAS":                  ("Fig. 2", "c", "fig2c_human_gnas_modbam"),
+    "fig2c_agent_GNAS":                  ("Fig. 2", "c", "fig2c_agent_gnas_modbam"),
     # Not Figure 2c. Figure 2c is the two ONT chromosome 20 arms, each drawn from its own
     # phasing run; Extended Data Fig. 3b is the same for PacBio. data/icr_bam holds the
     # whole-genome phased reads of the sample, so what these two draw is the region plot
@@ -172,8 +197,13 @@ FIGURE_PANELS: dict[str, tuple[str, str, str]] = {
     "ed2_pacbio_panel_wgbs_cov_agent":   ("ED Fig. 2", "b", "ed2b_agent_wgbs_by_coverage"),
     "ed2_pacbio_panel_tss_human":        ("ED Fig. 2", "b", "ed2b_human_tss_profile"),
     "ed2_pacbio_panel_tss_agent":        ("ED Fig. 2", "b", "ed2b_agent_tss_profile"),
+    "ed2_pacbio_cost_panel_agent_cost":  ("ED Fig. 2", "a", "ed2a_agent_cost"),
 
-    "ed3_pacbio_panel_icr_haplotype":    ("ED Fig. 3", "b", "ed3b_icr_haplotype"),
+    "ed3_pacbio_cost_panel_agent_cost":  ("ED Fig. 3", "a", "ed3a_agent_cost"),
+    "ed3b_human_GNAS":                   ("ED Fig. 3", "b", "ed3b_human_gnas_modbam"),
+    "ed3b_agent_GNAS":                   ("ED Fig. 3", "b", "ed3b_agent_gnas_modbam"),
+    "ed3_pacbio_panel_icr_human":        ("ED Fig. 3", "b", "ed3b_human_icr_chr20"),
+    "ed3_pacbio_panel_icr_agent":        ("ED Fig. 3", "b", "ed3b_agent_icr_chr20"),
 
     "ed4abc_hexbins":                    ("ED Fig. 4", "a-c", "ed4abc_hexbins"),
     "Ideogram_dmr_t2t_hg002_ont_blue":   ("ED Fig. 4", "d", "ed4d_ont_haplotype_dmr_ideogram"),
@@ -196,13 +226,22 @@ NOT_PLACED = {
     "fig2_ont_panel_tss_profile", "fig2_ont_panel_wgbs_by_coverage",
     "ed2_pacbio_panel_tss_profile", "ed2_pacbio_panel_wgbs_by_coverage",
     "ed2_pacbio_panel_agent_cost", "ed3_pacbio_panel_agent_cost",
-    # both arms on one axis; the paper puts one arm on each side of panel c instead
-    "panel_icr_by_region",
+    # both arms on one axis; the paper puts one arm on each side instead
+    "panel_icr_by_region", "ed3_pacbio_panel_icr_by_region", "ed3_pacbio_panel_icr_haplotype",
+    # the three-panel hexbin sheet; the paper places the two singles from it
+    "fig2_ont_panel_hexbin_vs_wgbs", "fig2_ont_panel_hexbin_human_vs_agent",
+    "ed2_pacbio_panel_hexbin_vs_wgbs", "ed2_pacbio_panel_hexbin_human_vs_agent",
 }
 
 
-def name_by_figure(out: Path) -> list[tuple[str, str, str, str]]:
-    """Rename the images to <figure><panel>_<what>, and set the unplaced ones aside."""
+def name_by_figure(out: Path, since: float = 0.0) -> list[tuple[str, str, str, str]]:
+    """Rename the images to <figure><panel>_<what>, and set the unplaced ones aside.
+
+    `since` is when this run started. Everything in this directory is written by this run,
+    so anything older is what an earlier run left under a name nothing writes any more:
+    fig2c_gnas_ont.png outlived two renamings that way. They are removed rather than
+    carried, and the removal is printed.
+    """
     rows, other = [], out / "other_renders"
     for stem, (fig, panel, new) in sorted(FIGURE_PANELS.items(), key=lambda kv: kv[1][2]):
         got = [e for e in (".pdf", ".png") if (out / f"{stem}{e}").is_file()]
@@ -222,6 +261,10 @@ def name_by_figure(out: Path) -> list[tuple[str, str, str, str]]:
     for f in sorted(out.glob("*.png")):
         if f.stem not in known:
             print(f"    note  {f.name} is not in FIGURE_PANELS; left under its own name")
+    for f in sorted(list(out.glob("*.png")) + list(out.glob("*.pdf"))):
+        if since and f.stat().st_mtime < since:
+            print(f"    stale {f.name} is from an earlier run under a name nothing writes now; removed")
+            f.unlink()
     with open(out / "FIGURE_PANELS.tsv", "w") as fh:
         fh.write("figure\tpanel\tfile_stem\tdrawn_as\n")
         for r in rows:
@@ -234,6 +277,7 @@ def main(outdir: str = None) -> int:
     # relative output path stops pointing where the caller meant and cairo reports it as
     # "error while writing to output stream", which reads like a graphics fault rather than
     # a path one.
+    started = time.time()
     out = (Path(outdir) if outdir else REPO / "figures").resolve()
     out.mkdir(parents=True, exist_ok=True)
     os.environ["PANEL_OUT_DIR"] = str(out)
@@ -311,7 +355,35 @@ def main(outdir: str = None) -> int:
             f.replace(out / "source_data" / f.name)
         stray.rmdir()
 
+    print("== Figure 2b, the per-site hexbins against the bisulfite reference")
+    # chromosome 20 only, which is what the two arms ran; the bisulfite table is the whole
+    # genome in the paper and a chr20 slice here, 13 MB instead of 515.
+    HEX = DATA / "hexbin_chr20"
+    s = out / "_stage_fig2b"; s.mkdir(exist_ok=True)
+    pyrun("Fig 2b hexbins vs WGBS", "make_hexbin_panel.py",
+          [str(HEX / "ont_human_chr20_persite_cov1.bed.gz"),
+           str(HEX / "ont_agent_chr20_persite_cov1.bed.gz"),
+           str(HEX / "wgbs_chr20.bismark.cov.gz"), str(s)])
+    print(f"    collected {collect(s, 'fig2_ont_', out)} files")
+
     print("== Extended Data Figs 2 and 3, the PacBio arms  (paper code)")
+    pyrun("ED2 a cost", "make_cost_panel.py", ["ed2_cost", "pacbio_calling"])
+    print(f"    harvested {harvest('ed2_pacbio_cost', out)} files")
+    pyrun("ED3 a cost", "make_cost_panel.py", ["ed3_cost", "pacbio_phasing"])
+    print(f"    harvested {harvest('ed3_pacbio_cost', out)} files")
+    s = out / "_stage_ed2b"; s.mkdir(exist_ok=True)
+    pyrun("ED2 b hexbins vs WGBS", "make_hexbin_panel.py",
+          [str(HEX / "pacbio_human_chr20_persite_cov1.bed.gz"),
+           str(HEX / "pacbio_agent_chr20_persite_cov1.bed.gz"),
+           str(HEX / "wgbs_chr20.bismark.cov.gz"), str(s)],
+          {"PANEL_PLATFORM": "PacBio"})
+    print(f"    collected {collect(s, 'ed2_pacbio_', out)} files")
+    s = out / "_stage_ed3b"; s.mkdir(exist_ok=True)
+    pyrun("ED3 b imprinting regions", "make_icr_panel.py",
+          [str(DATA / "ed_fig3" / "b_icr_human_phasing.csv"),
+           str(DATA / "ed_fig3" / "b_icr_agent_phasing.csv"), str(s)])
+    print(f"    collected {collect(s, 'ed3_pacbio_', out)} files")
+
     # The paper runs these through fig_supp3/10_render_panels_nm.py, an orchestrator that
     # stages a run tree and a 540 MB bisulfite table before calling the panel modules. The
     # modules are what draw, and they read the per-run evaluation records, which are here.
@@ -341,6 +413,19 @@ def main(outdir: str = None) -> int:
                                   "R_LIBS_USER": str(Path(sys.executable).parent.parent / "lib/R/library")}
     ).returncode == 0
     if have_nmv:
+        # Figure 2c and Extended Data Fig. 3b: each arm's own phased reads at GNAS, cut to
+        # the window the paper draws. GNAS is chr20:60,622,123-60,626,697 and the panel adds
+        # 3 kb of flank, which is what --flank passes.
+        GA = DATA / "gnas_arms"
+        for fig, plat, arm in (("fig2c", "ont", "human"), ("fig2c", "ont", "agent"),
+                               ("ed3b", "pacbio", "human"), ("ed3b", "pacbio", "agent")):
+            stem = f"{fig}_{plat}_{arm}"
+            rscript(f"{'Fig 2c' if fig == 'fig2c' else 'ED3 b'} GNAS {arm}", "modbam_region_plot.R",
+                    ["--hp1_bam", str(GA / f"{stem}_HP1.bam"), "--hp2_bam", str(GA / f"{stem}_HP2.bam"),
+                     "--chr", "chr20", "--start", "60622123", "--end", "60626697",
+                     "--flank", "3000", "--gtf_file", str(icr / "hs1.ncbiRefSeq.icr.gtf"),
+                     "--outdir", str(out), "--outfn_prefix", f"{fig}_{arm}",
+                     "--tagname", "GNAS", "--fig_w", "7", "--fig_h", "6", "--png"])
         for plat in ("ont", "pacbio"):
             rscript(f"GNAS region plot, {plat}", "modbam_region_plot.R",
                     ["--hp1_bam", str(icr / f"hg002_{plat}_icr_HP1.bam"),
@@ -408,7 +493,7 @@ def main(outdir: str = None) -> int:
             fh.write("\t".join(row) + "\n")
 
     print("\n== naming each image after the figure and panel it is")
-    rows = name_by_figure(out)
+    rows = name_by_figure(out, started)
     print(f"  {len(rows)} images carry their figure and panel; see FIGURE_PANELS.tsv")
     return 0 if n_ok == len(results) else 1
 
