@@ -9,29 +9,43 @@
 ## first cell and falls back to the figure the paper's own run produced.
 set -u
 
-## Which compiler. conda's R writes its own toolchain name into Makeconf, and that name
-## is only on PATH if a conda compiler package is installed. Installing one is not the
-## answer: conda-forge's cxx-compiler was tried and its driver could not reach its own
-## cc1plus, so every compile ended in "cannot execute 'cc1plus'". The base image's g++ is
-## a working compiler and is already here, so point R at it when R's configured one
-## cannot build a trivial file.
+## Which compiler. NanoMethViz declares C++20, so R builds it with CXX20 and nothing
+## else: a Makevars that sets CC and CXX is read and then ignored, which looks exactly
+## like an override that did not take. conda's R leaves CXX20 empty unless a conda
+## compiler package is installed, and installing one is not the answer either -
+## conda-forge's cxx-compiler was tried and its driver could not reach its own cc1plus.
 ##
-## CXX20, not CXX. NanoMethViz declares C++20, and R picks the compiler for the standard
-## the package asks for. Overriding CC and CXX alone leaves the build using Makeconf's
-## CXX20 and looks exactly like an override that was ignored.
+## So ask R for CXX20 directly. "Can this environment compile anything" is the wrong
+## question and answers yes while the C++20 build still fails with
+## "C++20 standard requested but CXX20 is not defined".
 probe=$(mktemp -d)
-printf '#include <string>\nint main(){return std::string("x").size()-1;}\n' > "$probe/t.cpp"
-if ! R CMD SHLIB "$probe/t.cpp" -o "$probe/t.so" >/dev/null 2>&1; then
-  if command -v g++ >/dev/null 2>&1; then
-    mkdir -p "$HOME/.R"
-    {
-      echo "CC  = $(command -v gcc)"
-      for v in CXX CXX11 CXX14 CXX17 CXX20; do echo "$v = $(command -v g++)"; done
-    } > "$HOME/.R/Makevars"
-    echo "postBuild: R's configured compiler could not build; using $(command -v g++)"
-  else
-    echo "postBuild: no working C++ compiler; NanoMethViz will be skipped"
-  fi
+printf '#include <version>\n#include <string>\nconsteval int f(){return 1;}\nint main(){return f()-1;}\n' \
+  > "$probe/t.cpp"
+cxx20=$(R CMD config CXX20 2>/dev/null)
+std=$(R CMD config CXX20STD 2>/dev/null); std=${std:--std=gnu++20}
+ok=no
+if [ -n "$cxx20" ] && $cxx20 $std -c "$probe/t.cpp" -o "$probe/t.o" >/dev/null 2>&1; then
+  ok=yes
+fi
+
+if [ "$ok" = yes ]; then
+  echo "postBuild: building with R's CXX20, $cxx20"
+elif command -v g++ >/dev/null 2>&1 && g++ -std=gnu++20 -c "$probe/t.cpp" -o "$probe/t.o" >/dev/null 2>&1; then
+  mkdir -p "$HOME/.R"
+  {
+    echo "CC  = $(command -v gcc)"
+    for v in CXX CXX11 CXX14 CXX17 CXX20; do echo "$v = $(command -v g++)"; done
+    ## The standard flags go with the compiler. R reads CXX20STD from Makeconf too, and
+    ## an empty one drops -std=gnu++20 from the command line, so the package would build
+    ## as the default standard and fail on what it uses from the newer one.
+    echo "CXX20STD = -std=gnu++20"
+    echo "CXX17STD = -std=gnu++17"
+    echo "CXX14STD = -std=gnu++14"
+    echo "CXX11STD = -std=gnu++11"
+  } > "$HOME/.R/Makevars"
+  echo "postBuild: R's CXX20 (${cxx20:-unset}) cannot build C++20; using $(command -v g++)"
+else
+  echo "postBuild: no working C++20 compiler; NanoMethViz will be skipped"
 fi
 rm -rf "$probe"
 
