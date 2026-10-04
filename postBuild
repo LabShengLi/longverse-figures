@@ -1,9 +1,14 @@
 #!/bin/bash
-# Register Arial if the image happens to carry it; the panels fall back to DejaVu Sans
-# otherwise. Nothing here may fail the build, hence the trailing true.
-set -e
-python - <<'PY' || true
-import matplotlib.font_manager as fm
-names = {f.name for f in fm.fontManager.ttflist}
-print("Arial available:" , "Arial" in names)
-PY
+## NanoMethViz draws the GNAS region plots. bioconda carries only 2.4.0, which is a major
+## version behind the 3.2.0 the paper used, so it is installed from Bioconductor instead:
+## same major version, same API, same rendering path. The build is a few minutes.
+##
+## This must not fail the image. If the install does not succeed the notebook falls back to
+## the figure the paper's own run produced, and says so where it appears.
+set -u
+R -q -e 'if (!requireNamespace("NanoMethViz", quietly = TRUE)) {
+           BiocManager::install("NanoMethViz", ask = FALSE, update = FALSE)
+         }
+         cat("NanoMethViz:",
+             tryCatch(as.character(packageVersion("NanoMethViz")), error = function(e) "absent"),
+             "on R", as.character(getRversion()), "\n")' || true

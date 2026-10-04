@@ -1,0 +1,18 @@
+panel	drawn_by	outcome
+Fig 1e consensus	paper code	ok
+Fig 1f by coverage	paper code	ok
+ED4 f,g ICR heatmaps	paper code, R: icr_heatmap_nm.R	ok
+ED5 c HP difference	paper code, R: boxplot_nm.R	ok
+ED4 d ideogram ont	paper code, R: ideogram_dmr_blue.R	ok
+ED4 e ideogram pacbio	paper code, R: ideogram_dmr_blue.R	ok
+ED5 a Venn	paper code: venn_nm.py	ok
+ED5 b coverage histogram	paper code: coverage_hist_nm.py	ok
+ED5 d TSS profile	paper code: profile_nm.py	ok
+ED5 e CTCF profile	paper code: profile_nm.py	ok
+Fig 2b,c + ED1 ONT panels	paper code: make_panels.py	ok
+ED1 b cost, calling	paper code: make_cost_panel.py	ok
+ED1 b cost, phasing	paper code: make_cost_panel.py	ok
+ED2 PacBio calling panels	paper code: make_panels.py	ok
+ED3 PacBio phasing panels	paper code: make_panels.py	ok
+ED4 a-c hexbins	exported hexagons	ok
+ED5 f region hexbins	exported hexagons	ok

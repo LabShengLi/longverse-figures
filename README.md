@@ -3,53 +3,88 @@
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/LabShengLi/longverse-figures/main?urlpath=lab/tree/notebooks/00_all_figures.ipynb)
 
 Click the badge. A JupyterLab opens in your browser, already set up. Choose
-**Run -> Run All Cells** and every figure from the paper is redrawn in front of you, from
-the numbers it was drawn from.
+**Run -> Run All Cells** and every figure in the paper is drawn in front of you, by the
+code that drew it for the paper.
 
-No download, no install, no account. The first launch builds the environment and takes a
-few minutes; afterwards it starts in about half a minute.
+No download, no install, no account. The first launch builds the image and takes ten to
+fifteen minutes, because the four R panels need real Bioconductor packages; after that it
+starts in about half a minute.
 
 Figures for *LongVerse: one sentence to the allele-specific methylome, verified multi-agent
 AI for Nanopore and PacBio long-read sequencing.*
 
 ---
 
-## What is here
+## This runs the paper's code, not a lookalike
 
-    data/          every number each panel draws, 3.5 MB in total
-    notebooks/     00_all_figures.ipynb, plus one notebook per figure
-    scripts/       panels.py, one function per kind of panel
-    figures/       where the PDFs and PNGs are written
+`scripts/paper/` holds twenty-one scripts copied from the paper's repository **verbatim**,
+with one edit each: a hard-coded cluster path becomes an environment variable.
 
-## Why it is only 3.5 MB
+    ENS = Path("/project2/.../2026_09_28_ensemble_chr22")
+    ENS = Path(os.environ.get("LV_ENS", "/project2/.../2026_09_28_ensemble_chr22"))
+
+That is the whole change, and it is checked: the vendoring script diffs each copy against
+its source and refuses any line that differs for another reason.
+
+This matters because the first version of this repository did not do it. The panels were
+redrawn by eye from the exported numbers, and Figure 1e came back without its error half
+and without the value labels on its bars, Figure 1f without its gain panel. Redrawing from
+a description does not converge on the original.
+
+`figures/RENDER_LOG.tsv` names, for every panel, which script drew it.
+
+## Why the repository is small
 
 The figures are computed from whole-genome data: 60 million CpG sites per platform, BAMs in
-the hundreds of gigabytes. None of that is needed to *draw* them, and this repository ships
-what is.
+the hundreds of gigabytes. Almost none of that is needed to *draw* them.
 
-| panel | drawn from | reduced from |
+| what a panel needs | size |
+| --- | --- |
+| per-run evaluation records, which hold the profiles and the costs | 23 to 33 KB each |
+| the three-caller consensus tables | 1 to 2 KB |
+| the imprinting tables | 19 KB |
+| phased reads at the imprinting regions, for the region plots | 116 MB |
+| the T2T annotation over those regions | 777 KB of 753 MB |
+
+The read slice is the one piece that had to be made rather than found. The ninety
+imprinting control regions span 1.02 Mb once padded, which is 0.005 percent of the genome,
+so the phased BAMs go from 85 GB and 53 GB to 38 and 19 MB per haplotype. Base quality
+strings are dropped: NanoMethViz reads the MM and ML tags, and keeping the qualities
+doubled the size for nothing.
+
+## The GNAS region plots depend on a source build
+
+Figure 2c and Extended Data Fig. 1c are drawn by NanoMethViz. bioconda carries only 2.4.0,
+a major version behind the 3.2.0 the paper used, so `postBuild` installs it from
+Bioconductor instead. That is a source build with compiled dependencies, and it is the one
+step here that can fail on a machine this was not tested on: it did not complete on the
+cluster it was prepared on, where the conda compiler wrapper could not find its own
+backend.
+
+So the notebook does not assume it. If NanoMethViz is present the panel is regenerated from
+the reads in `data/icr_bam/`; if it is not, the figure the paper's own run produced is
+shown instead, and `figures/RENDER_LOG.tsv` records which of the two happened on that run.
+
+## The two panels that are not the paper's code
+
+Everything else runs the paper's script. These two cannot, and the render log says so on
+their rows.
+
+| panel | why | what is drawn instead |
 | --- | --- | --- |
-| hexbins | the ~11,000 hexagons matplotlib computes, 52 KB each | 56-62 million rows, 450 MB each |
-| ideograms | the 45,339 and 21,609 DMRs that clear the cutoff | 2.6 million tiles, 73 MB |
-| region hexbins | 8 x ~10,000 hexagons | per-region tables up to 276 MB |
-| profiles, costs, tables | already the drawn values | unchanged |
+| ED Fig. 4a-c, whole-genome hexbins | the paper's script reads three 450 MB point tables | the ~11,000 hexagons its own `hexbin()` computed, exported once |
+| ED Fig. 5f, region hexbins | the paper's script loads RData objects up to 890 MB | the same, per region |
 
-The reduction is exact, not a sample. The hexagons are produced by the same `hexbin` call
-the paper's panels use, `gridsize=100` over `extent=(0, 100, 0, 100)`, and the DMRs are
-those passing the published cutoff of |HP1 - HP2| >= 50 percentage points and q <= 0.01.
-Binning 202,270 sites returns hexagons whose counts sum to 202,270: no point is dropped.
+The reduction is exact, not a sample: binning 202,270 sites returns hexagons whose counts
+sum to 202,270. What differs is the twenty lines that turn hexagons into a picture.
 
-That is also what makes the repository run on the 2 GB of memory a free Binder gets.
+## What is here
 
-## These are redraws, not the submitted files
-
-The paper's ideograms were drawn with karyoploteR and its heatmaps with ComplexHeatmap.
-Installing those on Binder takes ten to twenty minutes and fails often enough to matter, so
-every panel here is redrawn in matplotlib from the identical numbers. They are equivalent,
-not byte-identical: colours and spacing differ slightly.
-
-The R originals, and the whole pipeline, are in the main repository:
-<https://github.com/LabShengLi/longverse>.
+    data/          every number each panel draws, plus the imprinting-region reads
+    notebooks/     00_all_figures.ipynb
+    scripts/paper/ the paper's scripts, verbatim but for their roots
+    scripts/       render_all.py, which runs them; panels.py, for the two exported panels
+    figures/       where the PDFs and PNGs are written
 
 ## Running it elsewhere
 
@@ -58,12 +93,18 @@ git clone https://github.com/LabShengLi/longverse-figures
 cd longverse-figures
 conda env create -f environment.yml
 conda activate longverse-figures
-jupyter lab notebooks/00_all_figures.ipynb
+bash postBuild                      # installs NanoMethViz from Bioconductor
+python scripts/render_all.py figures
 ```
 
-## Reproducing from the raw data instead
+`render_all.py` runs R with `--vanilla` and pins `R_LIBS` to the environment's own library.
+That is deliberate: on the machine this was built on, a personal R library held a `stringi`
+compiled against a different ICU, and three of the four R panels failed to load. A reader's
+own R settings must not be able to change the paper's figures.
 
-This repository starts from the drawn numbers. To start from reads, the published
+## Reproducing from reads instead
+
+This repository starts from what each panel draws. To start from raw signal, the published
 chromosome 20 GNAS test set is 33 MB and runs the whole pipeline in minutes:
 
 - data: Zenodo record 23090404
@@ -71,9 +112,10 @@ chromosome 20 GNAS test set is 33 MB and runs the whole pipeline in minutes:
 
 ## Notes on the data
 
-Paths in the command lines shown in Figure 2a have been rewritten to `$LONGVERSE`,
-`$RESULTS` and similar. They were absolute paths on a shared HPC filesystem; the shape of
-the invocation is what the panel is about.
+Command lines shown in Figure 2a have had their paths rewritten to `$LONGVERSE`, `$RESULTS`
+and similar. They were absolute paths on a shared HPC filesystem; the shape of the
+invocation is what the panel is about. Figure 2a itself is native PowerPoint text in the
+paper rather than an image, so the notebook prints its content instead of redrawing it.
 
 `data/plot_layer/MANIFEST.tsv` records, for each exported file, how many rows it draws and
-how many rows it was reduced from.
+how many it was reduced from. `data/icr_bam/README.txt` records how the read slice was cut.

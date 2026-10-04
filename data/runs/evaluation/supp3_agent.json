@@ -1,0 +1,589 @@
+{
+  "arm": "supp3_agent",
+  "launch_dir": "$RESULTS/2026_10_02_suppfig34_pacbio_chr20/supp3_agent/launch",
+  "inputs": {
+    "persite_all": "$RESULTS/2026_10_02_suppfig34_pacbio_chr20/supp3_agent/launch/results/supp3_agent-methylation-callings/Site_Level-supp3_agent_all/supp3_agent_all_PB_JASMINE-perSite-cov1.sort.bed.gz",
+    "persite_HP1": null,
+    "persite_HP2": null,
+    "split_HP1_bam": null,
+    "split_HP2_bam": null,
+    "basecalled_bam": null,
+    "basecalled_bam_from_work_dir": false
+  },
+  "measurements": {
+    "tss_profile": {
+      "tool": "longverse_tss_profile",
+      "seconds": 23.9,
+      "ok": true,
+      "message": "TSS profile for supp3_agent_chr20: 80 bins over +/-2000 bp at 50 bp resolution, CpGs with coverage >= 5.",
+      "payload": {
+        "message": "TSS profile for supp3_agent_chr20: 80 bins over +/-2000 bp at 50 bp resolution, CpGs with coverage >= 5.",
+        "reference": "repo/longverse/hpc_test/analysis/Figure2/bed_or_tsv_to_bigwig.sh for the bigWig step, and the computeMatrix reference-point / plotProfile invocation of repo/longverse/hpc_test/analysis/Figure2/deeptools_tss_plot.inner.sh generalised to arbitrary inputs (that script hard-codes one dataset's paths) (pinned local copy, tree sha256 516bbb118fe36507...)",
+        "artifacts": [
+          {
+            "description": "profile PDF",
+            "path": "$RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_tss_profile_20261002T213255Z_6b1295/supp3_agent_chr20.TSS.profile.pdf"
+          },
+          {
+            "description": "profile values per bin (plotProfile --outFileNameData)",
+            "path": "$RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_tss_profile_20261002T213255Z_6b1295/supp3_agent_chr20.TSS.profile.tsv"
+          },
+          {
+            "description": "computeMatrix matrix",
+            "path": "$RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_tss_profile_20261002T213255Z_6b1295/supp3_agent_chr20.TSS.mat.gz"
+          },
+          {
+            "description": "computeMatrix per-region matrix",
+            "path": "$RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_tss_profile_20261002T213255Z_6b1295/supp3_agent_chr20.TSS.outMatrix.tsv.gz"
+          },
+          {
+            "description": "bigWig built from the per-site table",
+            "path": "$RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_tss_profile_20261002T213255Z_6b1295/supp3_agent_chr20.cov5.bw"
+          }
+        ],
+        "n_regions": 194234,
+        "n_bins": 80,
+        "settings": {
+          "min_cov": 5,
+          "flank_bp": 2000,
+          "bin_size": 50
+        },
+        "profile": [
+          {
+            "position_bp": -1975,
+            "mean_methylation": 0.61067
+          },
+          {
+            "position_bp": -1925,
+            "mean_methylation": 0.59189
+          },
+          {
+            "position_bp": -1875,
+            "mean_methylation": 0.59035
+          },
+          {
+            "position_bp": -1825,
+            "mean_methylation": 0.59248
+          },
+          {
+            "position_bp": -1775,
+            "mean_methylation": 0.59517
+          },
+          {
+            "position_bp": -1725,
+            "mean_methylation": 0.59759
+          },
+          {
+            "position_bp": -1675,
+            "mean_methylation": 0.58055
+          },
+          {
+            "position_bp": -1625,
+            "mean_methylation": 0.57419
+          },
+          {
+            "position_bp": -1575,
+            "mean_methylation": 0.55711
+          },
+          {
+            "position_bp": -1525,
+            "mean_methylation": 0.55639
+          },
+          {
+            "position_bp": -1475,
+            "mean_methylation": 0.55477
+          },
+          {
+            "position_bp": -1425,
+            "mean_methylation": 0.56466
+          },
+          {
+            "position_bp": -1375,
+            "mean_methylation": 0.5495
+          },
+          {
+            "position_bp": -1325,
+            "mean_methylation": 0.56244
+          },
+          {
+            "position_bp": -1275,
+            "mean_methylation": 0.55504
+          },
+          {
+            "position_bp": -1225,
+            "mean_methylation": 0.53564
+          },
+          {
+            "position_bp": -1175,
+            "mean_methylation": 0.53174
+          },
+          {
+            "position_bp": -1125,
+            "mean_methylation": 0.52514
+          },
+          {
+            "position_bp": -1075,
+            "mean_methylation": 0.50861
+          },
+          {
+            "position_bp": -1025,
+            "mean_methylation": 0.50911
+          },
+          {
+            "position_bp": -975,
+            "mean_methylation": 0.48593
+          },
+          {
+            "position_bp": -925,
+            "mean_methylation": 0.48317
+          },
+          {
+            "position_bp": -875,
+            "mean_methylation": 0.45729
+          },
+          {
+            "position_bp": -825,
+            "mean_methylation": 0.45825
+          },
+          {
+            "position_bp": -775,
+            "mean_methylation": 0.43983
+          },
+          {
+            "position_bp": -725,
+            "mean_methylation": 0.40224
+          },
+          {
+            "position_bp": -675,
+            "mean_methylation": 0.41368
+          },
+          {
+            "position_bp": -625,
+            "mean_methylation": 0.38182
+          },
+          {
+            "position_bp": -575,
+            "mean_methylation": 0.35484
+          },
+          {
+            "position_bp": -525,
+            "mean_methylation": 0.35488
+          },
+          {
+            "position_bp": -475,
+            "mean_methylation": 0.33054
+          },
+          {
+            "position_bp": -425,
+            "mean_methylation": 0.30978
+          },
+          {
+            "position_bp": -375,
+            "mean_methylation": 0.28408
+          },
+          {
+            "position_bp": -325,
+            "mean_methylation": 0.28315
+          },
+          {
+            "position_bp": -275,
+            "mean_methylation": 0.25506
+          },
+          {
+            "position_bp": -225,
+            "mean_methylation": 0.25307
+          },
+          {
+            "position_bp": -175,
+            "mean_methylation": 0.24941
+          },
+          {
+            "position_bp": -125,
+            "mean_methylation": 0.23806
+          },
+          {
+            "position_bp": -75,
+            "mean_methylation": 0.22675
+          },
+          {
+            "position_bp": -25,
+            "mean_methylation": 0.23551
+          },
+          {
+            "position_bp": 25,
+            "mean_methylation": 0.25729
+          },
+          {
+            "position_bp": 75,
+            "mean_methylation": 0.25215
+          },
+          {
+            "position_bp": 125,
+            "mean_methylation": 0.25389
+          },
+          {
+            "position_bp": 175,
+            "mean_methylation": 0.25282
+          },
+          {
+            "position_bp": 225,
+            "mean_methylation": 0.26456
+          },
+          {
+            "position_bp": 275,
+            "mean_methylation": 0.26746
+          },
+          {
+            "position_bp": 325,
+            "mean_methylation": 0.27155
+          },
+          {
+            "position_bp": 375,
+            "mean_methylation": 0.28181
+          },
+          {
+            "position_bp": 425,
+            "mean_methylation": 0.28623
+          },
+          {
+            "position_bp": 475,
+            "mean_methylation": 0.29277
+          },
+          {
+            "position_bp": 525,
+            "mean_methylation": 0.30324
+          },
+          {
+            "position_bp": 575,
+            "mean_methylation": 0.31209
+          },
+          {
+            "position_bp": 625,
+            "mean_methylation": 0.34277
+          },
+          {
+            "position_bp": 675,
+            "mean_methylation": 0.33571
+          },
+          {
+            "position_bp": 725,
+            "mean_methylation": 0.36351
+          },
+          {
+            "position_bp": 775,
+            "mean_methylation": 0.34448
+          },
+          {
+            "position_bp": 825,
+            "mean_methylation": 0.37026
+          },
+          {
+            "position_bp": 875,
+            "mean_methylation": 0.39777
+          },
+          {
+            "position_bp": 925,
+            "mean_methylation": 0.42303
+          },
+          {
+            "position_bp": 975,
+            "mean_methylation": 0.45417
+          },
+          {
+            "position_bp": 1025,
+            "mean_methylation": 0.45497
+          },
+          {
+            "position_bp": 1075,
+            "mean_methylation": 0.45496
+          },
+          {
+            "position_bp": 1125,
+            "mean_methylation": 0.49907
+          },
+          {
+            "position_bp": 1175,
+            "mean_methylation": 0.48333
+          },
+          {
+            "position_bp": 1225,
+            "mean_methylation": 0.48806
+          },
+          {
+            "position_bp": 1275,
+            "mean_methylation": 0.515
+          },
+          {
+            "position_bp": 1325,
+            "mean_methylation": 0.50913
+          },
+          {
+            "position_bp": 1375,
+            "mean_methylation": 0.51351
+          },
+          {
+            "position_bp": 1425,
+            "mean_methylation": 0.54016
+          },
+          {
+            "position_bp": 1475,
+            "mean_methylation": 0.54063
+          },
+          {
+            "position_bp": 1525,
+            "mean_methylation": 0.54122
+          },
+          {
+            "position_bp": 1575,
+            "mean_methylation": 0.54333
+          },
+          {
+            "position_bp": 1625,
+            "mean_methylation": 0.52653
+          },
+          {
+            "position_bp": 1675,
+            "mean_methylation": 0.55057
+          },
+          {
+            "position_bp": 1725,
+            "mean_methylation": 0.57991
+          },
+          {
+            "position_bp": 1775,
+            "mean_methylation": 0.54582
+          },
+          {
+            "position_bp": 1825,
+            "mean_methylation": 0.57186
+          },
+          {
+            "position_bp": 1875,
+            "mean_methylation": 0.58282
+          },
+          {
+            "position_bp": 1925,
+            "mean_methylation": 0.59617
+          },
+          {
+            "position_bp": 1975,
+            "mean_methylation": 0.57318
+          }
+        ],
+        "summary": {
+          "mean_meth_within_200bp": 0.2457,
+          "mean_meth_outer_flank": 0.5787,
+          "dip_depth": 0.333,
+          "minimum_value": 0.2267,
+          "minimum_position_bp": -75
+        },
+        "commands": [
+          "bash $SCRATCH/paper2agent_pilot/longverse_mcp/repo/longverse/hpc_test/analysis/Figure2/bed_or_tsv_to_bigwig.sh -i $RESULTS/2026_10_02_suppfig34_pacbio_chr20/supp3_agent/launch/results/supp3_agent-methylation-callings/Site_Level-supp3_agent_all/supp3_agent_all_PB_JASMINE-perSite-cov1.sort.bed.gz -s $PROJECT/from_jax/projects/nanome/results/Nanopore_compare/nf_input/reference_genome/chm13/chm13v2.0.chrom.sizes -o $RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_tss_profile_20261002T213255Z_6b1295/supp3_agent_chr20.cov5.bw --min-cov 5",
+          "$HOME_DIR/conda/envs/py39_v2/bin/computeMatrix reference-point --referencePoint center -S $RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_tss_profile_20261002T213255Z_6b1295/supp3_agent_chr20.cov5.bw -R $HOME_DIR/reference/chm13v2.0/genes/hs1.ncbiRefSeq.tss.bed -b 2000 -a 2000 --binSize 50 --skipZeros --numberOfProcessors 4 -o $RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_tss_profile_20261002T213255Z_6b1295/supp3_agent_chr20.TSS.mat.gz --outFileNameMatrix $RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_tss_profile_20261002T213255Z_6b1295/supp3_agent_chr20.TSS.outMatrix.tsv.gz",
+          "$HOME_DIR/conda/envs/py39_v2/bin/plotProfile -m $RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_tss_profile_20261002T213255Z_6b1295/supp3_agent_chr20.TSS.mat.gz -out $RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_tss_profile_20261002T213255Z_6b1295/supp3_agent_chr20.TSS.profile.pdf --outFileNameData $RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_tss_profile_20261002T213255Z_6b1295/supp3_agent_chr20.TSS.profile.tsv --refPointLabel TSS --samplesLabel supp3_agent_chr20 --plotTitle 'CpG methylation around TSS (supp3_agent_chr20, cov>=5)'"
+        ],
+        "output_dir": "$RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_tss_profile_20261002T213255Z_6b1295"
+      }
+    },
+    "wgbs_by_coverage": {
+      "tool": "longverse_eval_vs_wgbs_by_coverage",
+      "seconds": 90.2,
+      "ok": true,
+      "message": "ONT-WGBS overlap 1552222 CpGs, PacBio-WGBS overlap 1550854 CpGs; 16 coverage-bin rows (min_cov 5) written to exp2_realcov_bin_results.tsv.",
+      "payload": {
+        "message": "ONT-WGBS overlap 1552222 CpGs, PacBio-WGBS overlap 1550854 CpGs; 16 coverage-bin rows (min_cov 5) written to exp2_realcov_bin_results.tsv.",
+        "reference": "repo/longverse/hpc_test/analysis/Figure3/build_pairwise_overlap_table.py -> Figure3/exp2_realcov_bin_eval.py (pinned local copy, tree sha256 516bbb118fe36507...)",
+        "artifacts": [
+          {
+            "description": "PCC/MSE/n_cpg per real-coverage bin (TSV)",
+            "path": "$RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_eval_vs_wgbs_by_coverage_20261002T213319Z_eb54f2/exp2_realcov_bin_results.tsv"
+          },
+          {
+            "description": "ONT vs WGBS inner-join per-site table (TSV gzip)",
+            "path": "$RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_eval_vs_wgbs_by_coverage_20261002T213319Z_eb54f2/ont_wgbs_inner_perSite.tsv.gz"
+          },
+          {
+            "description": "PacBio vs WGBS inner-join per-site table (TSV gzip)",
+            "path": "$RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_eval_vs_wgbs_by_coverage_20261002T213319Z_eb54f2/pacbio_wgbs_inner_perSite.tsv.gz"
+          }
+        ],
+        "results": [
+          {
+            "tool": "ont",
+            "cov_bin": "0-3",
+            "cov_bin_mid": 3.0,
+            "n_cpg": 0,
+            "PCC": null,
+            "MSE": null
+          },
+          {
+            "tool": "ont",
+            "cov_bin": "3-6",
+            "cov_bin_mid": 4.5,
+            "n_cpg": 6690,
+            "PCC": 0.5669224584611285,
+            "MSE": 0.10847382129107848
+          },
+          {
+            "tool": "ont",
+            "cov_bin": "6-9",
+            "cov_bin_mid": 7.5,
+            "n_cpg": 16901,
+            "PCC": 0.6335993723775502,
+            "MSE": 0.08361807871057193
+          },
+          {
+            "tool": "ont",
+            "cov_bin": "9-12",
+            "cov_bin_mid": 10.5,
+            "n_cpg": 32090,
+            "PCC": 0.724991720504402,
+            "MSE": 0.06485932169399881
+          },
+          {
+            "tool": "ont",
+            "cov_bin": "12-15",
+            "cov_bin_mid": 13.5,
+            "n_cpg": 56059,
+            "PCC": 0.8074063929663174,
+            "MSE": 0.048398444632655385
+          },
+          {
+            "tool": "ont",
+            "cov_bin": "15-18",
+            "cov_bin_mid": 16.5,
+            "n_cpg": 92319,
+            "PCC": 0.856628419671856,
+            "MSE": 0.03785929954009294
+          },
+          {
+            "tool": "ont",
+            "cov_bin": "18-21",
+            "cov_bin_mid": 19.5,
+            "n_cpg": 153693,
+            "PCC": 0.8816387040251209,
+            "MSE": 0.03255395082502193
+          },
+          {
+            "tool": "ont",
+            "cov_bin": ">21",
+            "cov_bin_mid": 22.5,
+            "n_cpg": 1183914,
+            "PCC": 0.9015803433248486,
+            "MSE": 0.02872895023019002
+          },
+          {
+            "tool": "pacbio",
+            "cov_bin": "0-3",
+            "cov_bin_mid": 3.0,
+            "n_cpg": 0,
+            "PCC": null,
+            "MSE": null
+          },
+          {
+            "tool": "pacbio",
+            "cov_bin": "3-6",
+            "cov_bin_mid": 4.5,
+            "n_cpg": 19967,
+            "PCC": 0.6209468859789962,
+            "MSE": 0.10011110424035581
+          },
+          {
+            "tool": "pacbio",
+            "cov_bin": "6-9",
+            "cov_bin_mid": 7.5,
+            "n_cpg": 68725,
+            "PCC": 0.7454649263686667,
+            "MSE": 0.06439594355171152
+          },
+          {
+            "tool": "pacbio",
+            "cov_bin": "9-12",
+            "cov_bin_mid": 10.5,
+            "n_cpg": 167590,
+            "PCC": 0.8357752457597704,
+            "MSE": 0.04231576699413002
+          },
+          {
+            "tool": "pacbio",
+            "cov_bin": "12-15",
+            "cov_bin_mid": 13.5,
+            "n_cpg": 314626,
+            "PCC": 0.8686555065523535,
+            "MSE": 0.034408333095349575
+          },
+          {
+            "tool": "pacbio",
+            "cov_bin": "15-18",
+            "cov_bin_mid": 16.5,
+            "n_cpg": 371416,
+            "PCC": 0.878956772131292,
+            "MSE": 0.03136962804821593
+          },
+          {
+            "tool": "pacbio",
+            "cov_bin": "18-21",
+            "cov_bin_mid": 19.5,
+            "n_cpg": 298694,
+            "PCC": 0.880271473921121,
+            "MSE": 0.029999690880266557
+          },
+          {
+            "tool": "pacbio",
+            "cov_bin": ">21",
+            "cov_bin_mid": 22.5,
+            "n_cpg": 291597,
+            "PCC": 0.8767568361142727,
+            "MSE": 0.03124554385217511
+          }
+        ],
+        "n_overlap_ont_wgbs": 1552222,
+        "n_overlap_pacbio_wgbs": 1550854,
+        "settings": {
+          "min_cov": 5
+        },
+        "commands": [
+          "$SCRATCH/paper2agent_pilot/longverse_mcp/longverse-env/bin/python $SCRATCH/paper2agent_pilot/longverse_mcp/repo/longverse/hpc_test/analysis/Figure3/build_pairwise_overlap_table.py --ont_bed $RESULTS/2026_10_02_suppfig34_pacbio_chr20/supp3_agent/launch/results/supp3_agent-methylation-callings/Site_Level-supp3_agent_all/supp3_agent_all_PB_JASMINE-perSite-cov1.sort.bed.gz --pacbio_bed $RESULTS/2026_09_24_agent_benchmark/data/pacbio_chr20_all.perSite.bed.gz --wgbs_cov $RESULTS/2026_06_08_hg002_bsseq/run_t2t/cpg/CpG.gz.bismark.cov.gz --out_ont $RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_eval_vs_wgbs_by_coverage_20261002T213319Z_eb54f2/ont_wgbs_inner_perSite.tsv.gz --out_pacbio $RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_eval_vs_wgbs_by_coverage_20261002T213319Z_eb54f2/pacbio_wgbs_inner_perSite.tsv.gz",
+          "$SCRATCH/paper2agent_pilot/longverse_mcp/longverse-env/bin/python $SCRATCH/paper2agent_pilot/longverse_mcp/repo/longverse/hpc_test/analysis/Figure3/exp2_realcov_bin_eval.py --ont_table $RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_eval_vs_wgbs_by_coverage_20261002T213319Z_eb54f2/ont_wgbs_inner_perSite.tsv.gz --pacbio_table $RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_eval_vs_wgbs_by_coverage_20261002T213319Z_eb54f2/pacbio_wgbs_inner_perSite.tsv.gz --min_cov 5 -o $RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_eval_vs_wgbs_by_coverage_20261002T213319Z_eb54f2/exp2_realcov_bin_results.tsv"
+        ],
+        "output_dir": "$RESULTS/2026_09_25_longverse_agent_benchmark/evaluation/supp3_agent/longverse_eval_vs_wgbs_by_coverage_20261002T213319Z_eb54f2"
+      }
+    },
+    "coverage_stats": {
+      "tool": "longverse_persite_coverage_stats",
+      "seconds": 1.1,
+      "ok": true,
+      "message": "Per-site coverage summary for supp3_agent: 1591619 sites",
+      "payload": {
+        "message": "Per-site coverage summary for supp3_agent: 1591619 sites",
+        "reference": "per-site column contract of repo/longverse (chr start end . . strand meth_freq coverage), the same 8-column layout read by hpc_test/analysis/plot_perSite_cov_hexbin_compare.py and Figure2/consensus_2platform.py. This tool counts and summarises those columns directly; it is a thin utility, not a wrapper of one upstream script, because none reports these counts (pinned local copy, tree sha256 516bbb118fe36507...)",
+        "artifacts": [],
+        "chrom": null,
+        "coverage_thresholds": [
+          1,
+          5,
+          10,
+          20
+        ],
+        "per_file": [
+          {
+            "label": "supp3_agent",
+            "file": "$RESULTS/2026_10_02_suppfig34_pacbio_chr20/supp3_agent/launch/results/supp3_agent-methylation-callings/Site_Level-supp3_agent_all/supp3_agent_all_PB_JASMINE-perSite-cov1.sort.bed.gz",
+            "n_sites": 1591619,
+            "sites_at_coverage": {
+              "cov_ge_1": 1591619,
+              "cov_ge_5": 1574491,
+              "cov_ge_10": 1544794,
+              "cov_ge_20": 1311610
+            },
+            "median_coverage": 26,
+            "mean_coverage": 26.571,
+            "max_coverage": 387,
+            "mean_methylation": 0.58957,
+            "malformed_lines": 0
+          }
+        ]
+      }
+    }
+  }
+}

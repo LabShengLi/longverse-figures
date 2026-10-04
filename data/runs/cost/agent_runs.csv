@@ -1,0 +1,8 @@
+run_id,figure,task,arm,steps,tools,input_tokens,output_tokens,thinking_tokens,cache_creation_input_tokens,cache_read_input_tokens,cost_usd,wall_seconds,cost_per_1k_output_tokens,cache_hit_fraction
+analysis_T1_icr,superseded,T1_icr,analysis_tools,1,longverse_methylation_at_regions_hp1_hp2,46,1474,607,11470,96433,0.1212,32.9,0.0822,0.894
+analysis_T2_modbam,superseded,T2_modbam,analysis_tools,1,longverse_modbam_region_plot,18,919,487,7175,35185,0.0686,21.2,0.0746,0.831
+phasing_mcp_prompt,New Figure 3,phasing,mcp_prompt,2,longverse_build_run_command -> longverse_launch_run,60,3362,1239,21362,138190,0.2237,62.2,0.0665,0.866
+phasing_tools_only,New Figure 3,phasing,tools_only,2,longverse_build_run_command -> longverse_launch_run,46,2145,944,30399,79800,0.2421,47.8,0.1129,0.724
+upstream_mcp_prompt,New Figure 2,upstream,mcp_prompt,5,longverse_inspect_pod5 -> longverse_list_dorado_models -> longverse_build_run_command -> longverse_build_run_command -> longverse_launch_run,146,6955,3219,52489,334022,0.5359,140.5,0.0771,0.864
+upstream_tools_only,New Figure 2,upstream,tools_only,5,longverse_inspect_pod5 -> longverse_list_dorado_models -> longverse_build_run_command -> longverse_build_run_command -> longverse_launch_run,162,10249,4463,65563,369094,0.6737,183.4,0.0657,0.849
+upstream_with_prompt,New Figure 2,upstream,with_prompt,6,longverse_inspect_pod5 -> longverse_list_dorado_models -> longverse_build_run_command -> longverse_build_run_command -> longverse_build_run_command -> longverse_launch_run,200,10390,5042,65803,463229,0.7111,202.6,0.0684,0.876

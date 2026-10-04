@@ -1,0 +1,14 @@
+{
+  "font_used": "DejaVu Sans",
+  "human": "supp4_human",
+  "agents": [
+    "supp4_agent"
+  ],
+  "icr_haplotype": {
+    "supp4_agent": {
+      "values": 11,
+      "pearson_r": 1.0,
+      "max_abs_difference": 0.0
+    }
+  }
+}

@@ -1,17 +1,42 @@
-# Binder builds from this file. Pure Python on purpose: the paper's ideograms and
-# heatmaps were drawn in R (karyoploteR, ComplexHeatmap), but installing those on
-# mybinder takes ten to twenty minutes and fails often enough to matter. Every panel
-# here is redrawn in matplotlib from the same exported numbers, so the figures are
-# equivalent rather than byte-identical, and the environment builds in about a minute.
+# Binder builds from this file. R is here because four of the paper's panels are drawn with
+# it - the DMR ideograms with ggbio, the imprinting heatmaps with ComplexHeatmap, the
+# haplotype boxplot with ggpubr and the region hexbins with ggplot2 - and this repository
+# runs the paper's own code rather than a lookalike. Every R package below is a prebuilt
+# conda binary, not a source build, so the image takes about ten minutes to build once and
+# is cached from then on.
 name: longverse-figures
 channels:
   - conda-forge
+  - bioconda
 dependencies:
   - python=3.11
   - matplotlib=3.8
   - pandas=2.2
   - numpy=1.26
   - scipy=1.13
-  - matplotlib-venn=0.11
+  - matplotlib-venn
   - jupyterlab=4.2
-  - pip
+  # R, for the four panels whose authoritative implementation is in R
+  - r-base=4.3
+  - r-ggplot2
+  - r-ggpubr
+  - r-patchwork
+  - r-dplyr
+  - r-readr
+  - r-irkernel
+  - r-circlize
+  - r-rcolorbrewer
+  - r-tidyverse
+  - bioconductor-ggbio
+  - bioconductor-complexheatmap
+  - bioconductor-genomicranges
+  - bioconductor-rtracklayer
+  - r-argparser
+  - r-biocmanager
+  # NanoMethViz is installed from Bioconductor in postBuild because bioconda carries only
+  # 2.4.0, a major version behind the 3.2.0 the paper used. That is a source build, and
+  # several of its dependencies are C and C++, so the toolchain has to be in the image:
+  # without it every compiled dependency fails with "C compiler cannot create executables".
+  - compilers
+  - make
+  - pkg-config

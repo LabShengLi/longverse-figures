@@ -1,0 +1,3 @@
+platform	sites	mean_cov	median_cov	sites_cov_ge5	pct_cov_ge5
+ONT	65801544	29.45	30	63130991	95.94
+PacBio	65314640	26.16	26	63617062	97.40

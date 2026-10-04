@@ -1,0 +1,16 @@
+series,pearson_r_vs_wgbs,p_value,rmse_vs_wgbs,mae_vs_wgbs,n_sites,min_cov,wgbs_filter,strands
+longverse,0.926067,0.000e+00,0.136566,0.085275,1381961,5,none,not_merged
+deepmod2,0.915998,0.000e+00,0.148062,0.081500,1381961,5,none,not_merged
+rockfish,0.926201,0.000e+00,0.141490,0.080600,1381961,5,none,not_merged
+mean_longverse_deepmod2,0.933586,0.000e+00,0.129592,0.078036,1381961,5,none,not_merged
+mean_longverse_rockfish,0.932653,0.000e+00,0.130761,0.077419,1381961,5,none,not_merged
+mean_deepmod2_rockfish,0.932028,0.000e+00,0.133054,0.076907,1381961,5,none,not_merged
+mean_all,0.936185,0.000e+00,0.127275,0.075298,1381961,5,none,not_merged
+coverage_mean_all,0.937144,0.000e+00,0.126290,0.074822,1381961,5,none,not_merged
+median_all,0.933695,0.000e+00,0.131406,0.075392,1381961,5,none,not_merged
+residual_corr_longverse_deepmod2,0.659927,,,,1381961,5,none,not_merged
+residual_corr_longverse_rockfish,0.805438,,,,1381961,5,none,not_merged
+residual_corr_deepmod2_rockfish,0.704011,,,,1381961,5,none,not_merged
+caller_corr_longverse_deepmod2,0.945871,,,,1381961,5,none,not_merged
+caller_corr_longverse_rockfish,0.972124,,,,1381961,5,none,not_merged
+caller_corr_deepmod2_rockfish,0.953374,,,,1381961,5,none,not_merged

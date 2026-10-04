@@ -1,0 +1,37 @@
+coverage_bin,n_sites,series,pearson_r_vs_wgbs,gain_of_coverage_weighted_consensus_over_best_single
+5-7,10869,LongVerse,0.595184,
+5-7,10869,DeepMod2,0.455716,
+5-7,10869,Rockfish,0.595669,
+5-7,10869,"Consensus, LongVerse + DeepMod2",0.570947,
+5-7,10869,Consensus,0.601341,
+5-7,10869,Weighted Consensus,0.604542,0.008873
+8-10,12028,LongVerse,0.689620,
+8-10,12028,DeepMod2,0.638741,
+8-10,12028,Rockfish,0.684897,
+8-10,12028,"Consensus, LongVerse + DeepMod2",0.710021,
+8-10,12028,Consensus,0.718358,
+8-10,12028,Weighted Consensus,0.730220,0.040600
+11-14,20972,LongVerse,0.730800,
+11-14,20972,DeepMod2,0.743827,
+11-14,20972,Rockfish,0.728781,
+11-14,20972,"Consensus, LongVerse + DeepMod2",0.779547,
+11-14,20972,Consensus,0.775106,
+11-14,20972,Weighted Consensus,0.792681,0.048854
+15-19,52234,LongVerse,0.843341,
+15-19,52234,DeepMod2,0.854442,
+15-19,52234,Rockfish,0.843069,
+15-19,52234,"Consensus, LongVerse + DeepMod2",0.877020,
+15-19,52234,Consensus,0.874972,
+15-19,52234,Weighted Consensus,0.883856,0.029414
+20-29,500542,LongVerse,0.945268,
+20-29,500542,DeepMod2,0.943948,
+20-29,500542,Rockfish,0.947806,
+20-29,500542,"Consensus, LongVerse + DeepMod2",0.953254,
+20-29,500542,Consensus,0.955155,
+20-29,500542,Weighted Consensus,0.955557,0.007751
+30+,785316,LongVerse,0.931859,
+30+,785316,DeepMod2,0.913921,
+30+,785316,Rockfish,0.930842,
+30+,785316,"Consensus, LongVerse + DeepMod2",0.933858,
+30+,785316,Consensus,0.937500,
+30+,785316,Weighted Consensus,0.937355,0.005496

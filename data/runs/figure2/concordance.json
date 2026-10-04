@@ -1,0 +1,21 @@
+{
+  "font_used": "DejaVu Sans",
+  "human": "supp3_human",
+  "agents": [
+    "supp3_agent"
+  ],
+  "tss_profile": {
+    "supp3_agent": {
+      "n_bins": 80,
+      "pearson_r": 1.0,
+      "rms_difference": 0.0,
+      "max_abs_difference": 0.0
+    }
+  },
+  "wgbs_by_coverage": {
+    "supp3_agent": {
+      "bins": 7,
+      "max_abs_PCC_difference": 0.0
+    }
+  }
+}

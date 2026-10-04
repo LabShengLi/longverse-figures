@@ -1,0 +1,14 @@
+{
+  "font_used": "Arial",
+  "human": "human_phasing",
+  "agents": [
+    "agent_phasing"
+  ],
+  "icr_haplotype": {
+    "agent_phasing": {
+      "values": 12,
+      "pearson_r": 1.0,
+      "max_abs_difference": 0.0
+    }
+  }
+}
