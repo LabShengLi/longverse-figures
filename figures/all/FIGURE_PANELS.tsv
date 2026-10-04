@@ -1,0 +1,29 @@
+figure	panel	file_stem	drawn_as
+ED Fig. 1	a	ed1a_agent_wgbs_by_coverage	fig2_ont_panel_wgbs_cov_agent
+ED Fig. 1	a	ed1a_human_wgbs_by_coverage	fig2_ont_panel_wgbs_cov_human
+ED Fig. 1	b	ed1b_calling_agent_cost	ed1_cost_calling_panel_agent_cost
+ED Fig. 1	b	ed1b_phasing_agent_cost	ed1_cost_phasing_panel_agent_cost
+ED Fig. 2	b	ed2b_agent_tss_profile	ed2_pacbio_panel_tss_agent
+ED Fig. 2	b	ed2b_agent_wgbs_by_coverage	ed2_pacbio_panel_wgbs_cov_agent
+ED Fig. 2	b	ed2b_human_tss_profile	ed2_pacbio_panel_tss_human
+ED Fig. 2	b	ed2b_human_wgbs_by_coverage	ed2_pacbio_panel_wgbs_cov_human
+ED Fig. 3	b	ed3b_icr_haplotype	ed3_pacbio_panel_icr_haplotype
+ED Fig. 4	a-c	ed4abc_hexbins	ed4abc_hexbins
+ED Fig. 4	d	ed4d_ont_haplotype_dmr_ideogram	Ideogram_dmr_t2t_hg002_ont_blue
+ED Fig. 4	e	ed4e_pacbio_haplotype_dmr_ideogram	Ideogram_dmr_t2t_hg002_pacbio_blue
+ED Fig. 5	a	ed5a_cpg_sites_venn	venn_cov5_nm
+ED Fig. 5	b	ed5b_coverage_hist	coverage_hist_nm
+ED Fig. 5	c	ed5c_hp_diff_by_region	hp_diff_by_region_nm
+ED Fig. 5	d	ed5d_icr_novel_heatmap	icr_heatmap_novel_nm
+ED Fig. 5	e	ed5e_icr_known_heatmap	icr_heatmap_known_nm
+ED Fig. 5	f	ed5f_tss_profile	tss_profile_nm
+ED Fig. 5	g	ed5g_ctcf_profile	ctcf_profile_nm
+ED Fig. 5	h	ed5h_region_hexbins	ed5h_region_hexbins
+Fig. 1	e	fig1e_consensus_vs_wgbs	panel_f_consensus
+Fig. 1	f	fig1f_consensus_by_coverage	panel_g_by_coverage
+Fig. 2	b	fig2b_agent_tss_profile	fig2_ont_panel_tss_agent
+Fig. 2	b	fig2b_human_tss_profile	fig2_ont_panel_tss_human
+Fig. 2	c	fig2c_gnas_agent_reference	panel_modbam_agent_GNAS
+Fig. 2	c	fig2c_gnas_human_reference	panel_modbam_human_GNAS
+Fig. 2	c	fig2c_gnas_ont	gnas_ont_20_60617123_60644527
+Fig. 2	c	fig2c_gnas_pacbio	gnas_pacbio_20_60617123_60644527

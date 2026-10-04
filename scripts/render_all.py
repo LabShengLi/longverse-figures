@@ -132,6 +132,94 @@ def rscript(panel: str, script: str, args: list[str], env: dict | None = None):
     record(panel, f"paper code, R: {script}", run)
 
 
+# What the scripts write -> where that panel sits in the paper.
+#
+# The paper's scripts name a file after what it draws, because that is all they know:
+# panel_f_consensus.png is Figure 1e, and the novel imprinting heatmap is written by a script
+# that lives in a directory called fig_ed4 and is Extended Data Fig. 5d. A reader of this
+# directory needs the figure and the letter, so the batch render puts them in the name. The
+# per-notebook output under figures/notebook keeps the script's own name: there the point is
+# that the cell above wrote exactly that file.
+#
+# produced stem -> (figure, panel, new stem)
+FIGURE_PANELS: dict[str, tuple[str, str, str]] = {
+    "panel_f_consensus":                 ("Fig. 1", "e", "fig1e_consensus_vs_wgbs"),
+    "panel_g_by_coverage":               ("Fig. 1", "f", "fig1f_consensus_by_coverage"),
+
+    "fig2_ont_panel_tss_human":          ("Fig. 2", "b", "fig2b_human_tss_profile"),
+    "fig2_ont_panel_tss_agent":          ("Fig. 2", "b", "fig2b_agent_tss_profile"),
+    "gnas_ont_20_60617123_60644527":     ("Fig. 2", "c", "fig2c_gnas_ont"),
+    "gnas_pacbio_20_60617123_60644527":  ("Fig. 2", "c", "fig2c_gnas_pacbio"),
+    # only written when NanoMethViz is absent and the paper's own output is copied in
+    "panel_modbam_human_GNAS":           ("Fig. 2", "c", "fig2c_gnas_human_reference"),
+    "panel_modbam_agent_GNAS":           ("Fig. 2", "c", "fig2c_gnas_agent_reference"),
+
+    "fig2_ont_panel_wgbs_cov_human":     ("ED Fig. 1", "a", "ed1a_human_wgbs_by_coverage"),
+    "fig2_ont_panel_wgbs_cov_agent":     ("ED Fig. 1", "a", "ed1a_agent_wgbs_by_coverage"),
+    "ed1_cost_calling_panel_agent_cost": ("ED Fig. 1", "b", "ed1b_calling_agent_cost"),
+    "ed1_cost_phasing_panel_agent_cost": ("ED Fig. 1", "b", "ed1b_phasing_agent_cost"),
+
+    "ed2_pacbio_panel_hexbin_human_vs_wgbs": ("ED Fig. 2", "b", "ed2b_human_hexbin_vs_wgbs"),
+    "ed2_pacbio_panel_hexbin_agent_vs_wgbs": ("ED Fig. 2", "b", "ed2b_agent_hexbin_vs_wgbs"),
+    "ed2_pacbio_panel_wgbs_cov_human":   ("ED Fig. 2", "b", "ed2b_human_wgbs_by_coverage"),
+    "ed2_pacbio_panel_wgbs_cov_agent":   ("ED Fig. 2", "b", "ed2b_agent_wgbs_by_coverage"),
+    "ed2_pacbio_panel_tss_human":        ("ED Fig. 2", "b", "ed2b_human_tss_profile"),
+    "ed2_pacbio_panel_tss_agent":        ("ED Fig. 2", "b", "ed2b_agent_tss_profile"),
+
+    "ed3_pacbio_panel_icr_haplotype":    ("ED Fig. 3", "b", "ed3b_icr_haplotype"),
+
+    "ed4abc_hexbins":                    ("ED Fig. 4", "a-c", "ed4abc_hexbins"),
+    "Ideogram_dmr_t2t_hg002_ont_blue":   ("ED Fig. 4", "d", "ed4d_ont_haplotype_dmr_ideogram"),
+    "Ideogram_dmr_t2t_hg002_pacbio_blue":("ED Fig. 4", "e", "ed4e_pacbio_haplotype_dmr_ideogram"),
+
+    "venn_cov5_nm":                      ("ED Fig. 5", "a", "ed5a_cpg_sites_venn"),
+    "coverage_hist_nm":                  ("ED Fig. 5", "b", "ed5b_coverage_hist"),
+    "hp_diff_by_region_nm":              ("ED Fig. 5", "c", "ed5c_hp_diff_by_region"),
+    "icr_heatmap_novel_nm":              ("ED Fig. 5", "d", "ed5d_icr_novel_heatmap"),
+    "icr_heatmap_known_nm":              ("ED Fig. 5", "e", "ed5e_icr_known_heatmap"),
+    "tss_profile_nm":                    ("ED Fig. 5", "f", "ed5f_tss_profile"),
+    "ctcf_profile_nm":                   ("ED Fig. 5", "g", "ed5g_ctcf_profile"),
+    "ed5h_region_hexbins":               ("ED Fig. 5", "h", "ed5h_region_hexbins"),
+}
+
+# Rendered, and not placed in any figure: the two-arms-in-one versions of panels the paper
+# draws one arm at a time. Kept, because they are what the script produces, but out of the
+# way so that what is left in figures/all is the figures.
+NOT_PLACED = {
+    "fig2_ont_panel_tss_profile", "fig2_ont_panel_wgbs_by_coverage",
+    "ed2_pacbio_panel_tss_profile", "ed2_pacbio_panel_wgbs_by_coverage",
+    "ed2_pacbio_panel_agent_cost", "ed3_pacbio_panel_agent_cost",
+}
+
+
+def name_by_figure(out: Path) -> list[tuple[str, str, str, str]]:
+    """Rename the images to <figure><panel>_<what>, and set the unplaced ones aside."""
+    rows, other = [], out / "other_renders"
+    for stem, (fig, panel, new) in sorted(FIGURE_PANELS.items(), key=lambda kv: kv[1][2]):
+        got = [e for e in (".pdf", ".png") if (out / f"{stem}{e}").is_file()]
+        if not got:
+            continue
+        for e in got:
+            if stem != new:
+                (out / f"{stem}{e}").replace(out / f"{new}{e}")
+        rows.append((fig, panel, new, stem))
+    for stem in sorted(NOT_PLACED):
+        for e in (".pdf", ".png"):
+            src = out / f"{stem}{e}"
+            if src.is_file():
+                other.mkdir(exist_ok=True)
+                src.replace(other / f"{stem}{e}")
+    known = set(FIGURE_PANELS) | {v[2] for v in FIGURE_PANELS.values()} | NOT_PLACED
+    for f in sorted(out.glob("*.png")):
+        if f.stem not in known:
+            print(f"    note  {f.name} is not in FIGURE_PANELS; left under its own name")
+    with open(out / "FIGURE_PANELS.tsv", "w") as fh:
+        fh.write("figure\tpanel\tfile_stem\tdrawn_as\n")
+        for r in rows:
+            fh.write("\t".join(r) + "\n")
+    return rows
+
+
 def main(outdir: str = None) -> int:
     # Absolute, always. ideogram_dmr_blue.R does setwd(IDEOGRAM_WDIR) before it draws, so a
     # relative output path stops pointing where the caller meant and cairo reports it as
@@ -295,6 +383,10 @@ def main(outdir: str = None) -> int:
         fh.write("panel\tdrawn_by\toutcome\n")
         for row in results:
             fh.write("\t".join(row) + "\n")
+
+    print("\n== naming each image after the figure and panel it is")
+    rows = name_by_figure(out)
+    print(f"  {len(rows)} images carry their figure and panel; see FIGURE_PANELS.tsv")
     return 0 if n_ok == len(results) else 1
 
 

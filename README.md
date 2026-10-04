@@ -17,7 +17,8 @@ takes ten to fifteen minutes; after that it starts in about half a minute.
     notebooks/     one per figure: the code in the cell, the panel underneath
     scripts/paper/ the panel scripts, as they are in the paper's repository
     data/          what each panel draws, 128 MB
-    figures/       where a run writes its PDFs and PNGs
+    figures/all/   the batch render, each image named for the figure and panel it is
+    figures/       where a run of one notebook writes its PDFs and PNGs
 
 | notebook | figure |
 | --- | --- |
@@ -45,6 +46,20 @@ scripts read their arguments from a command line and a notebook has none.
 
 Cells are generated from `scripts/paper/`, and `python scripts/build_notebooks.py --check`
 confirms they still match it.
+
+## Two names for a panel, and which is where
+
+A panel script names its output after what it draws, because that is all it knows:
+`panel_f_consensus.png` is Figure 1e, and the novel imprinting heatmap is written by a script
+under `fig_ed4` and is Extended Data Fig. 5d. Both names are useful and they are kept apart:
+
+    figures/all/       named for the figure: fig1e_consensus_vs_wgbs, ed5d_icr_novel_heatmap
+                       FIGURE_PANELS.tsv maps each one back to the name the script gave it
+    figures/notebook/  named by the script, because the cell above it is that script and
+                       the point of the notebook is that the two agree
+
+`figures/all/other_renders/` holds what the scripts produce that no figure places: the
+versions of a panel with both arms in one plot, where the paper draws one arm at a time.
 
 ## The data
 
