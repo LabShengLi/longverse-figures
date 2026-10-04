@@ -25,5 +25,5 @@ Fig. 1	e	fig1e_consensus_vs_wgbs	panel_f_consensus
 Fig. 1	f	fig1f_consensus_by_coverage	panel_g_by_coverage
 Fig. 2	b	fig2b_agent_tss_profile	fig2_ont_panel_tss_agent
 Fig. 2	b	fig2b_human_tss_profile	fig2_ont_panel_tss_human
-Fig. 2	c	fig2c_gnas_ont	gnas_ont_20_60617123_60644527
-Fig. 2	c	fig2c_gnas_pacbio	gnas_pacbio_20_60617123_60644527
+-	-	gnas_ont_whole_sample	gnas_ont_20_60617123_60644527
+-	-	gnas_pacbio_whole_sample	gnas_pacbio_20_60617123_60644527

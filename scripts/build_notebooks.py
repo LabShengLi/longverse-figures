@@ -473,11 +473,16 @@ plt.close(fig)
 show("ed5h_region_hexbins.png")'''),
 ]),
 
-"08_gnas_region": ('''# Figure 2c - GNAS, per haplotype
+"08_gnas_region": ('''# GNAS, per haplotype - the region plot behind Fig. 2c and ED Fig. 3b
 
 Drawn by NanoMethViz from the phased reads. The whole-genome BAMs are 85 GB and 53 GB;
 cut to the ninety imprinting control regions they are 38 and 19 MB per haplotype, which
 is what `data/icr_bam/` holds.
+
+Figure 2c and Extended Data Fig. 3b put an expert's run beside the agent's, each drawn from
+that arm's own phasing output. The arms' phased BAMs are not in this repository, so what the
+cells below draw is this script on the sample itself, once per platform. The paper's own
+Figure 2c panels are in `data/reference_panels/` and the last cell shows them.
 
 NanoMethViz is installed from Bioconductor at build time, because bioconda carries only
 2.4.0 against the 3.2.0 the paper used. That is a source build and it can fail. The first
@@ -516,7 +521,7 @@ and the panel it drew appears underneath.
 | `05_extended_data_fig3.ipynb` | ED Fig. 3, PacBio phasing |
 | `06_extended_data_fig4.ipynb` | ED Fig. 4, across the genome |
 | `07_extended_data_fig5.ipynb` | ED Fig. 5, coverage and regions |
-| `08_gnas_region.ipynb` | Figure 2c, the GNAS region plots |
+| `08_gnas_region.ipynb` | the GNAS region plot, ONT and PacBio |
 | `00_all_figures.ipynb` | every cell above, in one run |
 
 The code in the cells is generated from `../scripts/paper/`, which holds the paper's own

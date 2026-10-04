@@ -148,11 +148,16 @@ FIGURE_PANELS: dict[str, tuple[str, str, str]] = {
 
     "fig2_ont_panel_tss_human":          ("Fig. 2", "b", "fig2b_human_tss_profile"),
     "fig2_ont_panel_tss_agent":          ("Fig. 2", "b", "fig2b_agent_tss_profile"),
-    "gnas_ont_20_60617123_60644527":     ("Fig. 2", "c", "fig2c_gnas_ont"),
-    "gnas_pacbio_20_60617123_60644527":  ("Fig. 2", "c", "fig2c_gnas_pacbio"),
+    # Not Figure 2c. Figure 2c is the two ONT chromosome 20 arms, each drawn from its own
+    # phasing run; Extended Data Fig. 3b is the same for PacBio. data/icr_bam holds the
+    # whole-genome phased reads of the sample, so what these two draw is the region plot
+    # the paper's two panels use, on the sample rather than on an arm. The arms' own BAMs
+    # are not here. Named for what they are.
+    "gnas_ont_20_60617123_60644527":     ("-", "-", "gnas_ont_whole_sample"),
+    "gnas_pacbio_20_60617123_60644527":  ("-", "-", "gnas_pacbio_whole_sample"),
     # only written when NanoMethViz is absent and the paper's own output is copied in
-    "panel_modbam_human_GNAS":           ("Fig. 2", "c", "fig2c_gnas_human_reference"),
-    "panel_modbam_agent_GNAS":           ("Fig. 2", "c", "fig2c_gnas_agent_reference"),
+    "panel_modbam_human_GNAS":           ("Fig. 2", "c", "fig2c_human_gnas_from_the_paper"),
+    "panel_modbam_agent_GNAS":           ("Fig. 2", "c", "fig2c_agent_gnas_from_the_paper"),
 
     "fig2_ont_panel_wgbs_cov_human":     ("ED Fig. 1", "a", "ed1a_human_wgbs_by_coverage"),
     "fig2_ont_panel_wgbs_cov_agent":     ("ED Fig. 1", "a", "ed1a_agent_wgbs_by_coverage"),
@@ -319,11 +324,13 @@ def main(outdir: str = None) -> int:
           ["figure3", "supp4_human", "supp4_agent"], {"PANEL_PLATFORM": "PacBio"})
     print(f"    harvested {harvest('ed3_pacbio', out)} files")
 
-    print("== Figure 2c and Extended Data Fig. 1c  GNAS region plots (paper code, R)")
-    # The paper draws these with NanoMethViz from the per-haplotype BAMs. Those are 85 GB
-    # and 53 GB whole-genome; cut to the imprinting control regions they are 38 and 19 MB,
-    # which is what data/icr_bam holds. If NanoMethViz is not in the environment the panel
-    # falls back to the figure the paper's own run produced, and the log says which.
+    print("== GNAS region plots, ONT and PacBio (paper code, R)")
+    # The script is the one that draws Figure 2c and Extended Data Fig. 3b, and the reads
+    # are the sample's whole-genome phased BAMs cut to the imprinting control regions: 85 GB
+    # and 53 GB down to 38 and 19 MB, which is what data/icr_bam holds. Those two figures
+    # compare an expert's run with the agent's, arm by arm, and the arms' own phased BAMs
+    # are not in this repository; the paper's own output for Figure 2c is in
+    # data/reference_panels and is what the fallback below shows.
     icr = DATA / "icr_bam"
     gnas = ("chr20", 60617123, 60644527)
     have_nmv = subprocess.run(
@@ -335,7 +342,7 @@ def main(outdir: str = None) -> int:
     ).returncode == 0
     if have_nmv:
         for plat in ("ont", "pacbio"):
-            rscript(f"Fig 2c GNAS {plat}", "modbam_region_plot.R",
+            rscript(f"GNAS region plot, {plat}", "modbam_region_plot.R",
                     ["--hp1_bam", str(icr / f"hg002_{plat}_icr_HP1.bam"),
                      "--hp2_bam", str(icr / f"hg002_{plat}_icr_HP2.bam"),
                      "--chr", gnas[0], "--start", str(gnas[1]), "--end", str(gnas[2]),
@@ -350,7 +357,7 @@ def main(outdir: str = None) -> int:
                 n += 1
             if not n:
                 raise RuntimeError("NanoMethViz absent and no reference panel to fall back to")
-        record("Fig 2c GNAS", "paper output, NOT regenerated (NanoMethViz absent)", fallback)
+        record("Fig 2c GNAS, from the paper", "paper output, NOT regenerated (NanoMethViz absent)", fallback)
 
     print("== hexbins drawn from the exported hexagon layer")
     import panels as P                                           # noqa: E402

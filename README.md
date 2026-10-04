@@ -29,7 +29,7 @@ takes ten to fifteen minutes; after that it starts in about half a minute.
 | `05_extended_data_fig3` | ED Fig. 3 - PacBio phasing |
 | `06_extended_data_fig4` | ED Fig. 4a-e - ONT, PacBio and WGBS across the genome |
 | `07_extended_data_fig5` | ED Fig. 5a-h - coverage, imprinting and regional agreement |
-| `08_gnas_region` | Fig. 2c - GNAS, per haplotype |
+| `08_gnas_region` | the region plot behind Fig. 2c - GNAS, per haplotype |
 | `00_all_figures` | draws everything in one go |
 
 The notebooks are committed with their figures, so they can be read on GitHub without
