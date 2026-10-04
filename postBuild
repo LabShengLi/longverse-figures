@@ -31,17 +31,22 @@ fi
 if [ "$ok" = yes ]; then
   echo "postBuild: building with R's CXX20, $cxx20"
 elif command -v g++ >/dev/null 2>&1 && g++ -std=gnu++20 -c "$probe/t.cpp" -o "$probe/t.o" >/dev/null 2>&1; then
+  ## The whole CXX<n> family, not just the compiler. When conda's Makeconf has no
+  ## CXX20 it has no CXX20STD, CXX20FLAGS or CXX20PICFLAGS either, and each missing one
+  ## fails differently and later: no STD builds under the wrong standard, no PICFLAGS
+  ## compiles without -fPIC and dies at the link with "relocation R_X86_64_PC32 against
+  ## symbol can not be used when making a shared object".
+  gxx=$(command -v g++)
+  cxxflags=$(R CMD config CXXFLAGS 2>/dev/null); cxxflags=${cxxflags:--O2 -g}
   mkdir -p "$HOME/.R"
   {
     echo "CC  = $(command -v gcc)"
-    for v in CXX CXX11 CXX14 CXX17 CXX20; do echo "$v = $(command -v g++)"; done
-    ## The standard flags go with the compiler. R reads CXX20STD from Makeconf too, and
-    ## an empty one drops -std=gnu++20 from the command line, so the package would build
-    ## as the default standard and fail on what it uses from the newer one.
-    echo "CXX20STD = -std=gnu++20"
-    echo "CXX17STD = -std=gnu++17"
-    echo "CXX14STD = -std=gnu++14"
-    echo "CXX11STD = -std=gnu++11"
+    for n in "" 11 14 17 20; do
+      echo "CXX$n = $gxx"
+      echo "CXX${n}FLAGS = $cxxflags"
+      echo "CXX${n}PICFLAGS = -fPIC"
+      [ -n "$n" ] && echo "CXX${n}STD = -std=gnu++$n"
+    done
   } > "$HOME/.R/Makevars"
   echo "postBuild: R's CXX20 (${cxx20:-unset}) cannot build C++20; using $(command -v g++)"
 else
