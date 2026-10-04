@@ -16,8 +16,9 @@ dependencies:
   - scipy=1.13
   - matplotlib-venn
   - jupyterlab=4.2
+  - ipython<9
   # R, for the four panels whose authoritative implementation is in R
-  - r-base=4.3
+  - r-base=4.4.3
   - r-ggplot2
   - r-ggpubr
   - r-patchwork
@@ -34,11 +35,23 @@ dependencies:
   - bioconductor-genomicranges
   - bioconductor-rtracklayer
   - r-argparser
-  - r-biocmanager
-  # NanoMethViz is installed from Bioconductor in postBuild because bioconda carries only
-  # 2.4.0, a major version behind the 3.2.0 the paper used. That is a source build, and
-  # several of its dependencies are C and C++, so the toolchain has to be in the image:
-  # without it every compiled dependency fails with "C compiler cannot create executables".
-  - compilers
-  - make
-  - pkg-config
+  # NanoMethViz draws the GNAS region plots, and the paper used 3.2.0. R is pinned to 4.4
+  # for it: Bioconductor 3.18, which is what R 4.3 gets, ships 2.8.1, and 2.8.1's
+  # plot_grange() has none of smoothing_window, heatmap_subsample or gene_anno. The
+  # difference is an API, not a style, so the paper's script cannot run against it at all.
+  # 3.x arrives with Bioconductor 3.19, which needs R 4.4. The pin is 4.4.3, the version
+  # the paper's figures were drawn on, so the R here and the R there are the same.
+  #
+  # Its compiled dependencies come from bioconda prebuilt, because the source route failed
+  # in the Binder image on Cairo and rhdf5filters and left the panel undrawn.
+  - bioconductor-rhdf5
+  - bioconductor-rhdf5filters
+  - bioconductor-bsseq
+  - r-ggrastr
+  - bioconductor-genomeinfodbdata
+  - bioconductor-biocsingular
+  - r-irlba
+  - r-dbscan
+  # No conda compiler here on purpose. bioconda's newest NanoMethViz is 2.8.1, so 3.2.0
+  # is compiled in postBuild, and conda-forge's cxx-compiler was tried for that and could
+  # not reach its own cc1plus. postBuild uses the base image's g++ instead.

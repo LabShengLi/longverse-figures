@@ -152,7 +152,14 @@ def cell_rsource_argparser(script: str, argv: list[str], env: dict, shows: list[
     setenv = "\n".join(f'Sys.setenv({k} = {rv(v)})' for k, v in env.items()) if env else ""
     head = (f"%%R\n## scripts/paper/{script}, run as R. Edit any line and re-run the cell.\n"
             + (setenv + "\n\n" if setenv else "\n"))
-    return head + src, list(shows)
+    # The script saves by opening a device, printing, and calling graphics.off(). That
+    # closes the device the %%R magic opened for the cell, and the magic's own dev.off()
+    # afterwards then fails on the null device. Reopening one costs nothing and is not
+    # part of the drawing: everything above has already been written to disk.
+    tail = ("\n\n## The magic closes a device when the cell ends, and the script's\n"
+            "## graphics.off() already closed it. Give it one to close.\n"
+            "grDevices::pdf(NULL)\n")
+    return head + src + tail, list(shows)
 
 
 def cell_rsource(script: str, argv: list[str], env: dict, shows: list[str]) -> str:
@@ -441,11 +448,11 @@ cell says which of the two you are looking at.''', [
 ("## GNAS, ONT\n\n"
  "The paper's NanoMethViz script, inlined. `parse_args` is given its arguments "
  "directly because a notebook has no command line; that one line is marked in the code.",
- cell_rsource_argparser("modbam_region_plot.R", ['--hp1_bam', '../data/icr_bam/hg002_ont_icr_HP1.bam', '--hp2_bam', '../data/icr_bam/hg002_ont_icr_HP2.bam', '--chr', 'chr20', '--start', '60617123', '--end', '60644527', '--gtf_file', '../data/icr_bam/hs1.ncbiRefSeq.icr.gtf', '--outdir', '../figures/notebook', '--outfn_prefix', 'gnas_ont', '--fig_w', '7', '--fig_h', '6'], {}, ["gnas_ont.png"])),
+ cell_rsource_argparser("modbam_region_plot.R", ['--hp1_bam', '../data/icr_bam/hg002_ont_icr_HP1.bam', '--hp2_bam', '../data/icr_bam/hg002_ont_icr_HP2.bam', '--chr', 'chr20', '--start', '60617123', '--end', '60644527', '--gtf_file', '../data/icr_bam/hs1.ncbiRefSeq.icr.gtf', '--outdir', '../figures/notebook', '--outfn_prefix', 'gnas_ont', '--fig_w', '7', '--fig_h', '6', '--png'], {}, ["gnas_ont_20_60617123_60644527.png"])),
 
 ("## GNAS, PacBio\n\n"
  "The same script, the other platform's reads.",
- cell_rsource_argparser("modbam_region_plot.R", ['--hp1_bam', '../data/icr_bam/hg002_pacbio_icr_HP1.bam', '--hp2_bam', '../data/icr_bam/hg002_pacbio_icr_HP2.bam', '--chr', 'chr20', '--start', '60617123', '--end', '60644527', '--gtf_file', '../data/icr_bam/hs1.ncbiRefSeq.icr.gtf', '--outdir', '../figures/notebook', '--outfn_prefix', 'gnas_pacbio', '--fig_w', '7', '--fig_h', '6'], {}, ["gnas_pacbio.png"])),
+ cell_rsource_argparser("modbam_region_plot.R", ['--hp1_bam', '../data/icr_bam/hg002_pacbio_icr_HP1.bam', '--hp2_bam', '../data/icr_bam/hg002_pacbio_icr_HP2.bam', '--chr', 'chr20', '--start', '60617123', '--end', '60644527', '--gtf_file', '../data/icr_bam/hs1.ncbiRefSeq.icr.gtf', '--outdir', '../figures/notebook', '--outfn_prefix', 'gnas_pacbio', '--fig_w', '7', '--fig_h', '6', '--png'], {}, ["gnas_pacbio_20_60617123_60644527.png"])),
 
 ("## If NanoMethViz is not here\n\n"
  "The figures the paper's own run produced, included so the repository shows every "

@@ -1,14 +1,63 @@
 #!/bin/bash
-## NanoMethViz draws the GNAS region plots. bioconda carries only 2.4.0, which is a major
-## version behind the 3.2.0 the paper used, so it is installed from Bioconductor instead:
-## same major version, same API, same rendering path. The build is a few minutes.
+## NanoMethViz 3.2.0, the version the paper's figures were drawn with. The newest conda
+## build of it is 2.8.1, against R 4.3, and 2.8.1's plot_grange() does not take
+## smoothing_window, heatmap_subsample or gene_anno. So it is built from Bioconductor
+## here. Its dependencies are already in the image from environment.yml, so this compiles
+## one package rather than a chain of them.
 ##
-## This must not fail the image. If the install does not succeed the notebook falls back to
-## the figure the paper's own run produced, and says so where it appears.
+## It must not fail the image. If it does not succeed the GNAS notebook says so in its
+## first cell and falls back to the figure the paper's own run produced.
 set -u
-R -q -e 'if (!requireNamespace("NanoMethViz", quietly = TRUE)) {
+
+## Which compiler. conda's R writes its own toolchain name into Makeconf, and that name
+## is only on PATH if a conda compiler package is installed. Installing one is not the
+## answer: conda-forge's cxx-compiler was tried and its driver could not reach its own
+## cc1plus, so every compile ended in "cannot execute 'cc1plus'". The base image's g++ is
+## a working compiler and is already here, so point R at it when R's configured one
+## cannot build a trivial file.
+##
+## CXX20, not CXX. NanoMethViz declares C++20, and R picks the compiler for the standard
+## the package asks for. Overriding CC and CXX alone leaves the build using Makeconf's
+## CXX20 and looks exactly like an override that was ignored.
+probe=$(mktemp -d)
+printf '#include <string>\nint main(){return std::string("x").size()-1;}\n' > "$probe/t.cpp"
+if ! R CMD SHLIB "$probe/t.cpp" -o "$probe/t.so" >/dev/null 2>&1; then
+  if command -v g++ >/dev/null 2>&1; then
+    mkdir -p "$HOME/.R"
+    {
+      echo "CC  = $(command -v gcc)"
+      for v in CXX CXX11 CXX14 CXX17 CXX20; do echo "$v = $(command -v g++)"; done
+    } > "$HOME/.R/Makevars"
+    echo "postBuild: R's configured compiler could not build; using $(command -v g++)"
+  else
+    echo "postBuild: no working C++ compiler; NanoMethViz will be skipped"
+  fi
+fi
+rm -rf "$probe"
+
+## GenomeInfoDbData first. It is annotation data, not code, and bioconda ships it as a
+## post-link script that downloads it at install time rather than as files in the package,
+## so a conda environment can hold bioconductor-genomeinfodbdata and still not have it.
+## BiocManager does not catch that: GenomeInfoDb is present, so it treats the branch as
+## satisfied and never looks at what GenomeInfoDb itself needs. NanoMethViz then compiles
+## and fails at the last step with "there is no package called 'GenomeInfoDbData'".
+R -q -e 'if (!requireNamespace("GenomeInfoDbData", quietly = TRUE)) {
+           if (!requireNamespace("BiocManager", quietly = TRUE))
+             install.packages("BiocManager", repos = "https://cloud.r-project.org")
+           BiocManager::install("GenomeInfoDbData", ask = FALSE, update = FALSE)
+         }' || true
+
+R -q -e 'if (!requireNamespace("NanoMethViz", quietly = TRUE) ||
+             packageVersion("NanoMethViz") < "3.0.0") {
+           if (!requireNamespace("BiocManager", quietly = TRUE))
+             install.packages("BiocManager", repos = "https://cloud.r-project.org")
            BiocManager::install("NanoMethViz", ask = FALSE, update = FALSE)
          }
+         ## packageVersion() reads the directory and answers for a package that will not
+         ## load; one such check once reported a version on an R too old to run it.
+         ## library() is the check.
          cat("NanoMethViz:",
-             tryCatch(as.character(packageVersion("NanoMethViz")), error = function(e) "absent"),
+             tryCatch({ suppressMessages(library(NanoMethViz))
+                        as.character(packageVersion("NanoMethViz")) },
+                      error = function(e) paste("will not load:", conditionMessage(e))),
              "on R", as.character(getRversion()), "\n")' || true

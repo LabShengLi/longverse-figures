@@ -222,7 +222,7 @@ def main(outdir: str = None) -> int:
                      "--chr", gnas[0], "--start", str(gnas[1]), "--end", str(gnas[2]),
                      "--gtf_file", str(icr / "hs1.ncbiRefSeq.icr.gtf"),
                      "--outdir", str(out), "--outfn_prefix", f"gnas_{plat}",
-                     "--fig_w", "7", "--fig_h", "6"])
+                     "--fig_w", "7", "--fig_h", "6", "--png"])
     else:
         def fallback():
             n = 0

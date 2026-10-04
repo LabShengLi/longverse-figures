@@ -70,17 +70,6 @@ produced, exported once, because the scripts for them read 450 MB and 890 MB inp
 binning is exact: 202,270 sites give hexagons whose counts sum to 202,270. Every other panel
 runs its script. `figures/RENDER_LOG.tsv` lists which is which.
 
-## GNAS
-
-`08_gnas_region` draws the region plots with NanoMethViz from `data/icr_bam/`. NanoMethViz
-comes from Bioconductor at build time, because bioconda has 2.4.0 against the 3.2.0 the
-paper used, and that source build does not always succeed.
-
-The committed outputs in that notebook are from a machine where it did not: the first cell
-reports NanoMethViz missing, the R cells carry their error, and the last cell shows the
-figures the paper's own run produced. Where the build works, the R cells draw the plots from
-the reads instead.
-
 ## Running it elsewhere
 
 ```bash
@@ -91,6 +80,11 @@ conda activate longverse-figures
 bash postBuild
 jupyter lab notebooks
 ```
+
+R here is 4.4.3 and NanoMethViz is 3.2.0, the versions the paper's figures were drawn
+on. `postBuild` compiles NanoMethViz rather than installing it prebuilt: the newest conda
+build is 2.8.1, and 2.8.1's `plot_grange()` does not take the arguments the paper's script
+passes.
 
 R runs with `--vanilla` and `R_LIBS` pinned to the environment, so a personal R library
 cannot change what the figures look like.
