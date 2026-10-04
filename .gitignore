@@ -12,3 +12,7 @@ data/runs/**/panels/
 # anyone running anything. scripts/clean_notebook_outputs.py strips the machine paths out
 # of those outputs first.
 figures/notebook/
+
+# NanoMethViz writes an RData alongside each region plot; it is 4 MB of plot object
+# that nothing in this repository reads.
+figures/**/*.RData

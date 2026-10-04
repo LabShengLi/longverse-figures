@@ -22,13 +22,13 @@ takes ten to fifteen minutes; after that it starts in about half a minute.
 | notebook | figure |
 | --- | --- |
 | `01_figure1` | Fig. 1e, f - three callers and their consensus |
-| `02_figure2` | Fig. 2a, b, c - one sentence reproduces the expert, ONT |
-| `03_extended_data_fig1` | ED Fig. 1 - the remaining ONT panels |
+| `02_figure2` | Fig. 2a, b - one sentence reproduces the expert, ONT |
+| `03_extended_data_fig1` | ED Fig. 1a, b - the remaining ONT panels |
 | `04_extended_data_fig2` | ED Fig. 2 - PacBio calling |
 | `05_extended_data_fig3` | ED Fig. 3 - PacBio phasing |
-| `06_extended_data_fig4` | ED Fig. 4 - ONT, PacBio and WGBS across the genome |
-| `07_extended_data_fig5` | ED Fig. 5 - coverage and regional agreement |
-| `08_gnas_region` | GNAS, per haplotype |
+| `06_extended_data_fig4` | ED Fig. 4a-e - ONT, PacBio and WGBS across the genome |
+| `07_extended_data_fig5` | ED Fig. 5a-h - coverage, imprinting and regional agreement |
+| `08_gnas_region` | Fig. 2c - GNAS, per haplotype |
 | `00_all_figures` | draws everything in one go |
 
 The notebooks are committed with their figures, so they can be read on GitHub without
@@ -65,10 +65,21 @@ haplotype. Base qualities are dropped, since NanoMethViz reads the MM and ML tag
 
 ## Two panels drawn from exported values
 
-ED Fig. 4a-c and ED Fig. 5f are redrawn from the hexagons their own `hexbin()` call
+ED Fig. 4a-c and ED Fig. 5h are redrawn from the hexagons their own `hexbin()` call
 produced, exported once, because the scripts for them read 450 MB and 890 MB inputs. The
 binning is exact: 202,270 sites give hexagons whose counts sum to 202,270. Every other panel
-runs its script. `figures/RENDER_LOG.tsv` lists which is which.
+drawn here runs its script. `figures/RENDER_LOG.tsv` lists which is which. The eight exported
+region files are named `ed5_f_<region>`, the panel letter they carried when the export ran;
+the panel is h.
+
+## Two panels that are not here
+
+Fig. 2b puts two plots in each arm's frame and this repository draws the right-hand one. The
+left-hand one is a per-site hexbin whose script reads both arms' whole chromosome 20 per-site
+tables and the 540 MB bisulfite table. ED Fig. 1c, the chromosome 20 imprinting control
+regions, needs each arm's own per-region table from its pipeline run. Neither input is
+carried here, so `scripts/paper/make_hexbin_panel.py` and `scripts/paper/make_icr_panel.py`
+ship as the paper's code without a cell that calls them.
 
 ## Running it elsewhere
 

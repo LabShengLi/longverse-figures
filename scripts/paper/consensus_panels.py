@@ -54,6 +54,12 @@ _FIG_W = os.environ.get("PANEL_FIG_W")
 # Measured at 5.5 in and 16 pt: the long y labels of the depth panel collide with each
 # other, its x label runs off the right edge, and the last two gain annotations overlap.
 SHORT = bool(os.environ.get("PANEL_SHORT_LABELS"))
+# Where the by-depth panel puts its legend. Inside the axes it sits on the curves: the lower
+# right corner holds DeepMod2 rising from r = 0.45 and the upper left holds the consensus
+# curves at 11 to 14x, so at journal size the key covers the lines it describes. The poster
+# already moved it above the axes; PANEL_LEGEND_ABOVE lets the paper do the same without
+# taking the poster's shortened axis labels with it.
+LEGEND_ABOVE = SHORT or bool(os.environ.get("PANEL_LEGEND_ABOVE"))
 
 
 def L(long_text: str, short_text: str) -> str:
@@ -430,7 +436,9 @@ def panel_f_consensus() -> None:
     # The three callers and the two ways of combining all three. The pairwise means are
     # measured too and are kept in this panel's source data with a drawn_in_panel column,
     # so a reader can see that the drawn series are not the only ones that beat the singles.
-    order = ["longverse", "deepmod2", "rockfish", "mean_all", "coverage_mean_all"]
+    # LongVerse, Rockfish, DeepMod2, then the two rules: the same order the by-depth panel
+    # draws its legend in, so e and f read down the same list (the author's call, 2026-10-04).
+    order = ["longverse", "rockfish", "deepmod2", "mean_all", "coverage_mean_all"]
     vals = [float(rows[k]["pearson_r_vs_wgbs"]) for k in order]
     n_sites = int(rows["longverse"]["n_sites"])
     best_single = max(vals[:3])
@@ -547,7 +555,7 @@ def panel_g_by_coverage() -> None:
         n_by_bin[r["bin"]] = int(r["n_sites"])
 
     singles = ["longverse", "deepmod2", "rockfish"]
-    shown = singles + ["mean_all", "coverage_mean_all"]
+    shown = ["longverse", "rockfish", "deepmod2", "mean_all", "coverage_mean_all"]
 
     fig, (ax, axd) = plt.subplots(2, 1, figsize=_fs(6.4, 4.9), sharex=True,
                                   gridspec_kw={"height_ratios": [2.15, 1.0]})
@@ -566,20 +574,22 @@ def panel_g_by_coverage() -> None:
     # sat on the consensus curves at 11 to 14x. Outside the axes it can cover nothing. The
     # in-figure title is dropped in the same mode, the poster's panel header already names
     # the panel. The journal figure keeps its signed off layout.
-    if SHORT:
-        # two columns, not three: with three, the row holding Consensus and Weighted
-        # Consensus was wider than the axes, the tight crop grew the file to 5.9 in, and
-        # the pair no longer fit the column. Two columns keep every row inside the axes.
-        # Below 5 in of canvas even two columns are wider than the axes and the tight
-        # crop would grow the file past its slot. One column is 3 in wide at any size.
-        narrow = fig.get_figwidth() < 5.5
+    if LEGEND_ABOVE:
+        # Two columns, always. matplotlib fills a column at a time, so five entries land as
+        # three and two: the three callers on the left, the two consensus rules on the right,
+        # which is the split the panel is about. One column was five rows of key above a plot
+        # that needed the height for its curves (the author's call, 2026-10-04). Three columns
+        # were tried earlier and the row holding Consensus and Weighted Consensus came out
+        # wider than the axes.
         ax.legend(frameon=False, fontsize=panel_style.MIN_PT, loc="lower center",
-                  bbox_to_anchor=(0.5, 1.0), ncol=1 if narrow else 2,
-                  columnspacing=1.2, handlelength=1.6)
+                  bbox_to_anchor=(0.5, 1.0), ncol=2,
+                  columnspacing=1.0, handlelength=1.4)
     else:
         ax.legend(frameon=False, fontsize=panel_style.MIN_PT, loc="lower right")
     ax.tick_params(labelsize=panel_style.MIN_PT)
-    if not SHORT:
+    # The title lives where the legend now is, so one of them has to go: the deck's panel
+    # header already says what this panel shows, and the legend cannot be read anywhere else.
+    if not LEGEND_ABOVE:
         ax.set_title("Agreement by read depth, chromosome 22",
                      fontsize=panel_style.MIN_PT, pad=8)
     for sp in ("top", "right"):

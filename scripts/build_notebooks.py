@@ -216,10 +216,25 @@ def cell_r_rerun(script: str, argv: list[str], env: dict, shows: list[str]) -> s
 
 # notebook -> (intro markdown, [(heading, cell source)])
 def books() -> dict:
+    # The paper's own settings for these two panels, from fig_ed4/15_ideograms_wide.sbatch.
+    # Three of them are not cosmetic. The legend moves under the plot, which gives the
+    # karyogram about 3.3 in of a 3.52 in canvas instead of 2.34 in. The panels are 6.5 in
+    # tall because the imprinting heatmaps left this figure on 2026-10-03 and freed the page.
+    # And the point size carries the canvas ratio, 3.52/8: a ggplot point is absolute
+    # millimetres, so the poster's 0.01 draws 45,329 DMRs as a solid band at paper size.
     IDEO = {"IDEOGRAM_METHDIFF": "50", "IDEOGRAM_QVALUE": "0.01", "IDEOGRAM_BASE_PT": "7",
-            "IDEOGRAM_TITLE_PT": "7", "IDEOGRAM_WIDTH_IN": "3.5", "IDEOGRAM_HEIGHT_IN": "3.3",
-            "IDEOGRAM_LEGEND_KEY": "2", "IDEOGRAM_TITLE": ""}
+            "IDEOGRAM_TITLE_PT": "7", "IDEOGRAM_WIDTH_IN": "3.52", "IDEOGRAM_HEIGHT_IN": "6.5",
+            "IDEOGRAM_LEGEND_KEY": "2", "IDEOGRAM_TITLE": "",
+            "IDEOGRAM_LEGEND_POS": "bottom", "IDEOGRAM_POINT_SIZE": "0.0044"}
     MERGED = "../data/ed_fig4/hg002_ONT_Pacbio_merged_with_annotation.mincov5.inner.csv"
+    # Figure 1 e and f, from fig1_bc/10_render_ef_panels.sbatch. consensus_panels.py reads
+    # all three when it is imported, so they are set before the cell loads it. The width is
+    # 3.35 and not 3.5 because the tight crop counts the legend above the axes into the
+    # width, and at 3.5 the pair no longer fits the 183 mm page side by side.
+    FIG1_ENV = ('import os\n'
+                'os.environ["PANEL_FIG_W"] = "3.35"\n'
+                'os.environ["PANEL_FIG_H_SCALE"] = "1.15"\n'
+                'os.environ["PANEL_LEGEND_ABOVE"] = "1"\n\n')
 
     return {
 "01_figure1": ("""# Figure 1
@@ -233,12 +248,12 @@ The code in each cell is `scripts/paper/consensus_panels.py`, which is the paper
 ("## Figure 1e - three callers and their consensus\n\n"
  "Correlation on top, error below. The two do not rank the callers the same way: Rockfish "
  "edges LongVerse on r and loses to it on error, which is why the panel shows both.",
- cell_func("consensus_panels.py", "panel_f_consensus",
+ FIG1_ENV + cell_func("consensus_panels.py", "panel_f_consensus",
            "panel_f_consensus()", ["panel_f_consensus.png"])),
 
 ("## Figure 1f - the same comparison by read depth\n\n"
  "The lower axis is where the consensus earns its keep.",
- cell_func("consensus_panels.py", "panel_g_by_coverage",
+ FIG1_ENV + cell_func("consensus_panels.py", "panel_g_by_coverage",
            "panel_g_by_coverage()", ["panel_g_by_coverage.png"])),
 ]),
 
@@ -250,14 +265,19 @@ The cell below is `scripts/paper/make_panels.py` in full. It reads the per-run e
 records and writes several panels in one pass, so it is inlined once and the cells after it
 show different panels from that run.""", [
 
-("## The paper's panel script, on the two ONT arms\n\n"
- "`human_upstream` is the expert's run, `agent_mcp_prompt` the agent's.",
+("## Figure 2b - the same evaluation applied to each arm\n\n"
+ "`human_upstream` is the expert's run, `agent_mcp_prompt` the agent's. In the paper each "
+ "arm sits in its own dashed frame holding two plots; these are the right-hand one of each.",
  cell_script("make_panels.py", ["figure2", "human_upstream", "agent_mcp_prompt"],
-             ["panel_tss_profile.png"], prefix="fig2_ont", harvest_as="fig2_ont")),
+             ["panel_tss_human.png", "panel_tss_agent.png"],
+             prefix="fig2_ont", harvest_as="fig2_ont")),
 
-("## Figure 2b - agreement with the bisulfite reference, by read depth\n\n"
- "Written by the same run as the cell above: that script draws several panels in one "
- "pass, so this cell only shows another of them.",
+("## The other half of Figure 2b, and what it is not\n\n"
+ "The left-hand plot in each frame is a per-site hexbin against the bisulfite reference. "
+ "Its script, `scripts/paper/make_hexbin_panel.py`, reads both arms' whole chromosome-20 "
+ "per-site tables and the 540 MB bisulfite table, which this repository does not carry, so "
+ "that half is not drawn here. What is below comes from the same pass as the cell above and "
+ "is the measurement Extended Data Fig. 1a makes, both arms in one plot.",
  'show("panel_wgbs_by_coverage.png", prefix="fig2_ont")'),
 
 ("## Figure 2a - what the two arms were given\n\n"
@@ -332,9 +352,13 @@ PacBio phasing and per-haplotype methylation.""", [
 
 ONT, PacBio and whole-genome bisulfite sequencing across the genome.
 
-Panels d to g are drawn in R, and the R source is in the cells. Panels a to c are the one
+Panels d and e are drawn in R, and the R source is in the cells. Panels a to c are the one
 place in this figure where the paper's script cannot run here: it reads three 450 MB point
-tables.""", [
+tables.
+
+The imprinting heatmaps used to be f and g of this figure. They moved to Extended Data
+Fig. 5 d, e on 2026-10-03, so they are in notebook 07. Their input still sits in
+`data/ed_fig4/`, which is where the paper's own build reads it from as well.""", [
 
 ("## a-c - per-site methylation, every pair of platforms\n\n"
  "**Not the paper's drawing code.** The hexagons are the ones the paper's own `hexbin()` "
@@ -373,14 +397,6 @@ show("ed4abc_hexbins.png")'''),
               {**IDEO, "IDEOGRAM_WDIR": "../data/ed_fig4/dmr/pacbio"},
               ["Ideogram_dmr_t2t_hg002_pacbio_blue.png"])),
 
-("## f, g - imprinting control regions, HP1 minus HP2\n\n"
- "ComplexHeatmap. The script checks its own output row by row against a reference table "
- "before it writes, so a silent change in the numbers stops it rather than producing a "
- "plausible figure.",
- cell_rsource("icr_heatmap_nm.R",
-              [MERGED, "../data/ed_fig4", "../figures/notebook"],
-              {"ICR_BASE_PT": "7"},
-              ["icr_heatmap_novel_nm.png", "icr_heatmap_known_nm.png"])),
 ]),
 
 "07_extended_data_fig5": ("""# Extended Data Fig. 5
@@ -402,19 +418,30 @@ Coverage and regional agreement between ONT and PacBio.""", [
  cell_rsource("boxplot_nm.R", [MERGED, "../figures/notebook"], {"ICR_BASE_PT": "7"},
               ["hp_diff_by_region_nm.png"])),
 
-("## d, e - methylation around TSS and CTCF sites, three platforms",
+("## d, e - imprinting control regions, HP1 minus HP2\n\n"
+ "ComplexHeatmap, novel regions in d and known ones in e. The script checks its own output "
+ "row by row against a reference table before it writes, so a silent change in the numbers "
+ "stops it rather than producing a plausible figure. The input lives under `data/ed_fig4/` "
+ "because these two panels were f and g of Extended Data Fig. 4 until 2026-10-03; the "
+ "paper's own build reads them from that directory too.",
+ cell_rsource("icr_heatmap_nm.R",
+              [MERGED, "../data/ed_fig4", "../figures/notebook"],
+              {"ICR_BASE_PT": "7"},
+              ["icr_heatmap_novel_nm.png", "icr_heatmap_known_nm.png"])),
+
+("## f - methylation around transcription start sites, three platforms",
  cell_script("profile_nm.py",
              ["{DATA}/ed_fig5/TSS_profile_3track_nozero_data.tsv",
               "{OUT}/tss_profile_nm", "TSS", "2000"],
              ["tss_profile_nm.png"])),
 
-("## e - CTCF, the same script with the other input",
+("## g - CTCF, the same script with the other input",
  cell_script("profile_nm.py",
              ["{DATA}/ed_fig5/CTCF_profile_3track_nozero_data.tsv",
               "{OUT}/ctcf_profile_nm", "CTCF site", "2000"],
              ["ctcf_profile_nm.png"])),
 
-("## f - ONT against PacBio within eight genomic region classes\n\n"
+("## h - ONT against PacBio within eight genomic region classes\n\n"
  "**Not the paper's drawing code**, for the same reason as Extended Data Fig. 4a-c: the "
  "paper's script loads RData objects up to 890 MB.",
  '''import panels as P
@@ -428,12 +455,12 @@ for reg, ax in zip(regions, axes.ravel()):
     ax.set_title(reg)
 fig.tight_layout()
 for ext in ("pdf", "png"):
-    fig.savefig(OUT / f"ed5f_region_hexbins.{ext}", bbox_inches="tight")
+    fig.savefig(OUT / f"ed5h_region_hexbins.{ext}", bbox_inches="tight")
 plt.close(fig)
-show("ed5f_region_hexbins.png")'''),
+show("ed5h_region_hexbins.png")'''),
 ]),
 
-"08_gnas_region": ('''# Figure 2c and Extended Data Fig. 1c - GNAS, per haplotype
+"08_gnas_region": ('''# Figure 2c - GNAS, per haplotype
 
 Drawn by NanoMethViz from the phased reads. The whole-genome BAMs are 85 GB and 53 GB;
 cut to the ninety imprinting control regions they are 38 and 19 MB per haplotype, which
@@ -470,13 +497,13 @@ and the panel it drew appears underneath.
 | notebook | figure |
 | --- | --- |
 | `01_figure1.ipynb` | Figure 1e, f |
-| `02_figure2.ipynb` | Figure 2a, b, c |
-| `03_extended_data_fig1.ipynb` | ED Fig. 1 |
+| `02_figure2.ipynb` | Figure 2a, b |
+| `03_extended_data_fig1.ipynb` | ED Fig. 1a, b |
 | `04_extended_data_fig2.ipynb` | ED Fig. 2, PacBio calling |
 | `05_extended_data_fig3.ipynb` | ED Fig. 3, PacBio phasing |
 | `06_extended_data_fig4.ipynb` | ED Fig. 4, across the genome |
 | `07_extended_data_fig5.ipynb` | ED Fig. 5, coverage and regions |
-| `08_gnas_region.ipynb` | GNAS region plots |
+| `08_gnas_region.ipynb` | Figure 2c, the GNAS region plots |
 | `00_all_figures.ipynb` | every cell above, in one run |
 
 The code in the cells is generated from `../scripts/paper/`, which holds the paper's own

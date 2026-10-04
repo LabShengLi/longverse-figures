@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Mean CpG methylation around a set of reference points (TSS or CTCF), three tracks, from the
-deepTools plotProfile data table. 7 pt, 2.9 x 2.0 in: the first version at 3.5 x 1.7 was too flat to
+deepTools plotProfile data table. 7 pt, 2.9 x 1.9 in: the first version at 3.5 x 1.7 was too flat to
 read the dip at the reference point. Same parsing as suppfig2/42_plot_profile_12pt.py: a sample row
 has a non-empty group column, the two header rows do not.
 
@@ -47,7 +47,7 @@ def main() -> int:
             series.append((r[0].strip(), vals))
     if not series:
         raise SystemExit(f"no plottable rows in {data}")
-    fig, ax = plt.subplots(figsize=(2.9, 2.0), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(2.9, 1.9), constrained_layout=True)
     for name, y in series:
         ax.plot(np.linspace(-flank, flank, len(y)), y, lw=1.0, label=name, color=COLORS.get(name))
     ax.axvline(0, color="#444444", lw=0.6, ls="--")

@@ -26,6 +26,16 @@ figW     <- as.numeric(Sys.getenv("IDEOGRAM_WIDTH_IN", "8"))
 figH     <- as.numeric(Sys.getenv("IDEOGRAM_HEIGHT_IN", "7"))
 legendKey <- as.numeric(Sys.getenv("IDEOGRAM_LEGEND_KEY", "4"))
 titleText <- Sys.getenv("IDEOGRAM_TITLE", "__default__")
+## Where the legend sits decides how wide the chromosomes are drawn. On the right it costs about a
+## third of the canvas: measured 2026-10-03, a 3.50 in panel gave the karyogram 2.34 in. At the bottom
+## the same canvas gives it about 3.3 in, which is the width the author asked for without widening the
+## figure past the 183 mm page.
+legendPos <- Sys.getenv("IDEOGRAM_LEGEND_POS", "right")
+## A ggplot point size is absolute, in millimetres, so it does NOT follow the canvas. At 8 x 7 in the
+## 45,329 ONT DMRs read as a scatter; on the 3.5 in paper panel the same dots cover about five times
+## as much of the karyogram and the scatter turns into a solid band. The default keeps the poster
+## render identical; the paper render passes the canvas ratio, 3.52/8.
+pointSize <- as.numeric(Sys.getenv("IDEOGRAM_POINT_SIZE", "0.01"))
 cat(sprintf("[CUTOFF] methdiff >= %g, qvalue <= %g\n", methDiffCutoff, methDiffQValue))
 
 ## Parameterised copy of hpc_test/analysis/Figure4/IdeomgramPlot_methykit_{ont,pacbio}_hg002.R.
@@ -167,7 +177,7 @@ ideoDMC <- function(dmr_df, chrom.length, difference = 25,
         legend_title <- "Annotation"
         p1 <- ggplot() + layout_karyogram(myIdeo)
         p2 <- p1 +
-            layout_karyogram(g.dmr, geom = "point", size = 0.01,
+            layout_karyogram(g.dmr, geom = "point", size = pointSize,
                              aes(x = midpoint,
                                  y = meth.diff, color = id)) +
             scale_colour_manual(legend_title,
@@ -189,10 +199,17 @@ ideoDMC <- function(dmr_df, chrom.length, difference = 25,
                 strip.text   = element_text(size = basePt),
                 legend.title = element_text(size = basePt),
                 legend.text  = element_text(size = basePt),
-                legend.key.size = unit(basePt * 1.2, "pt")
+                legend.key.size = unit(basePt * 1.2, "pt"),
+                legend.position = legendPos,
+                legend.margin = margin(t = 0, r = 0, b = 0, l = 0),
+                legend.box.margin = margin(t = -4, r = 0, b = 0, l = 0),
+                ## the chromosome names sit in a strip at the right edge; without this the last
+                ## character is clipped by the device on a narrow canvas
+                plot.margin = margin(t = 2, r = 6, b = 2, l = 2)
             ) +
             guides(color = guide_legend(
                 title = legend_title,
+                nrow = if (legendPos %in% c("bottom", "top")) 1 else NULL,
                 override.aes = list(
                     shape = unname(legend_shapes[legend_levels]),
                     fill = c(hyper.col, hypo.col, NA),

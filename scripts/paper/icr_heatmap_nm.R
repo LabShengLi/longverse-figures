@@ -24,7 +24,11 @@ CELL_H_MM <- as.numeric(Sys.getenv("ICR_CELL_H_MM", "4"))
 ROW_GAP_MM <- 1
 LEGEND_W_MM <- 16
 ROW_LABEL_W_MM <- 11
-COL_LABEL_H_MM <- as.numeric(Sys.getenv("ICR_COL_LABEL_MM", "22"))
+## Room for the rotated gene names and for the legend title above the two rows. Both are tight
+## rather than generous because these two panels moved into Extended Data Fig. 5 on 2026-10-03
+## and that page has 247 mm for eight panels. A clipped label shows up in the PNG, so these are
+## checked by eye after a change rather than assumed.
+COL_LABEL_H_MM <- as.numeric(Sys.getenv("ICR_COL_LABEL_MM", "20"))
 MARGIN_MM <- 2
 
 df_all <- read_csv(input_file, show_col_types = FALSE) %>%
@@ -70,7 +74,7 @@ draw_one <- function(plotdf, tag) {
     w_in <- (n_col * CELL_W_MM + LEGEND_W_MM + ROW_LABEL_W_MM + 2 * MARGIN_MM) / 25.4
     ## the legend is centred on the two heatmap rows and its title rises above them: 6 mm of
     ## headroom, or the title is clipped at the top of the device (seen 2026-10-03)
-    TOP_MM <- MARGIN_MM + 6
+    TOP_MM <- MARGIN_MM + as.numeric(Sys.getenv("ICR_TOP_EXTRA_MM", "4"))
     h_in <- (n_row * CELL_H_MM + (n_row - 1L) * ROW_GAP_MM + COL_LABEL_H_MM + MARGIN_MM + TOP_MM) / 25.4
     stem <- file.path(outdir, sprintf("icr_heatmap_%s_nm", tag))
     pad <- unit(c(MARGIN_MM, MARGIN_MM, TOP_MM, MARGIN_MM), "mm")   # bottom, left, top, right

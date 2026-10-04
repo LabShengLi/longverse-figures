@@ -142,13 +142,22 @@ def main(outdir: str = None) -> int:
     os.environ["PANEL_OUT_DIR"] = str(out)
 
     print("== Figure 1 e,f  (paper code)")
+    # fig1_bc/10_render_ef_panels.sbatch sets these three, and consensus_panels.py reads
+    # all of them when it is imported, so they go in before load(). 3.35 in and not 3.5
+    # because the tight crop counts f's legend above the axes into the width.
+    os.environ.setdefault("PANEL_FIG_W", "3.35")
+    os.environ.setdefault("PANEL_FIG_H_SCALE", "1.15")
+    os.environ.setdefault("PANEL_LEGEND_ABOVE", "1")
     cp = load("consensus_panels", PAPER / "consensus_panels.py")
     record("Fig 1e consensus", "paper code", cp.panel_f_consensus)
     record("Fig 1f by coverage", "paper code", cp.panel_g_by_coverage)
 
-    print("== Extended Data Fig. 4 f,g  imprinting heatmaps (paper code, R)")
+    # These two were f and g of Extended Data Fig. 4 until 2026-10-03, when they moved to
+    # Extended Data Fig. 5 to free that page. Their input keeps the ed_fig4 path, which is
+    # where the paper's own build_ed5.py reads them from as well.
+    print("== Extended Data Fig. 5 d,e  imprinting heatmaps (paper code, R)")
     merged = DATA / "ed_fig4" / "hg002_ONT_Pacbio_merged_with_annotation.mincov5.inner.csv"
-    rscript("ED4 f,g ICR heatmaps", "icr_heatmap_nm.R",
+    rscript("ED5 d,e ICR heatmaps", "icr_heatmap_nm.R",
             [str(merged), str(DATA / "ed_fig4"), str(out)], {"ICR_BASE_PT": "7"})
 
     print("== Extended Data Fig. 5c  haplotype difference boxplot (paper code, R)")
@@ -160,26 +169,32 @@ def main(outdir: str = None) -> int:
         wdir = DATA / "ed_fig4" / "dmr" / plat
         rscript(f"ED4 {'d' if plat == 'ont' else 'e'} ideogram {plat}",
                 "ideogram_dmr_blue.R", [plat, str(out)],
+                # fig_ed4/15_ideograms_wide.sbatch. The legend under the plot buys the
+                # karyogram about 3.3 in of a 3.52 in canvas; 6.5 in of height is what the
+                # heatmaps leaving this figure freed; and the point size carries the canvas
+                # ratio, 3.52/8, because a ggplot point is absolute millimetres and the
+                # poster's 0.01 draws 45,329 DMRs as a solid band at paper size.
                 {"IDEOGRAM_WDIR": str(wdir), "IDEOGRAM_METHDIFF": "50",
                  "IDEOGRAM_QVALUE": "0.01", "IDEOGRAM_BASE_PT": "7",
-                 "IDEOGRAM_TITLE_PT": "7", "IDEOGRAM_WIDTH_IN": "3.5",
-                 "IDEOGRAM_HEIGHT_IN": "3.3", "IDEOGRAM_LEGEND_KEY": "2",
-                 "IDEOGRAM_TITLE": ""})
+                 "IDEOGRAM_TITLE_PT": "7", "IDEOGRAM_WIDTH_IN": "3.52",
+                 "IDEOGRAM_HEIGHT_IN": "6.5", "IDEOGRAM_LEGEND_KEY": "2",
+                 "IDEOGRAM_TITLE": "", "IDEOGRAM_LEGEND_POS": "bottom",
+                 "IDEOGRAM_POINT_SIZE": "0.0044"})
 
-    print("== Extended Data Fig. 5 a,b,d,e  (paper code)")
+    print("== Extended Data Fig. 5 a,b,f,g  (paper code)")
     pyrun("ED5 a Venn", "venn_nm.py",
           [str(DATA / "ed_fig5" / "A_venn_covered_cpg_cov5_stats.tsv"), str(out / "venn_cov5_nm")])
     pyrun("ED5 b coverage histogram", "coverage_hist_nm.py",
           [str(DATA / "ed_fig5"), str(out / "coverage_hist_nm")])
-    pyrun("ED5 d TSS profile", "profile_nm.py",
+    pyrun("ED5 f TSS profile", "profile_nm.py",
           [str(DATA / "ed_fig5" / "TSS_profile_3track_nozero_data.tsv"),
            str(out / "tss_profile_nm"), "TSS", "2000"])
-    pyrun("ED5 e CTCF profile", "profile_nm.py",
+    pyrun("ED5 g CTCF profile", "profile_nm.py",
           [str(DATA / "ed_fig5" / "CTCF_profile_3track_nozero_data.tsv"),
            str(out / "ctcf_profile_nm"), "CTCF site", "2000"])
 
     print("== Figure 2 b,c and Extended Data Fig. 1  (paper code)")
-    pyrun("Fig 2b,c + ED1 ONT panels", "make_panels.py",
+    pyrun("Fig 2b + ED1a ONT panels", "make_panels.py",
           ["figure2", "human_upstream", "agent_mcp_prompt"])
     print(f"    harvested {harvest('fig2_ont', out)} files")
     pyrun("ED1 b cost, calling", "make_cost_panel.py", ["figure2", "upstream_mcp_prompt"])
@@ -260,9 +275,12 @@ def main(outdir: str = None) -> int:
             ax.set_title(reg)
         fig.tight_layout()
         for ext in ("pdf", "png"):
-            fig.savefig(out / f"ed5f_region_hexbins.{ext}", bbox_inches="tight")
+            fig.savefig(out / f"ed5h_region_hexbins.{ext}", bbox_inches="tight")
         plt.close(fig)
-    record("ED5 f region hexbins", "exported hexagons", regionfig)
+    # The eight exported files are still called ed5_f_<region>: that is the name the export
+    # job gave them and renaming shipped data to follow a panel letter would lose the link
+    # back to it. The panel is h.
+    record("ED5 h region hexbins", "exported hexagons", regionfig)
 
     # make_panels.py and make_cost_panel.py write beside their run directory, as they do in
     # the paper repository; PANEL_OUT_DIR is only honoured by the panel scripts that were
