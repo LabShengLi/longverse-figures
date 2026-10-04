@@ -1,0 +1,9 @@
+series,pearson_r_vs_wgbs,rmse_vs_wgbs,n_sites,is_consensus,drawn_in_panel
+LongVerse,0.926067,0.136566,1381961,no,yes
+DeepMod2,0.915998,0.148062,1381961,no,yes
+Rockfish,0.926201,0.141490,1381961,no,yes
+"Consensus, LongVerse + DeepMod2",0.933586,0.129592,1381961,yes,no
+mean_longverse_rockfish,0.932653,0.130761,1381961,yes,no
+mean_deepmod2_rockfish,0.932028,0.133054,1381961,yes,no
+Consensus,0.936185,0.127275,1381961,yes,yes
+Weighted Consensus,0.937144,0.126290,1381961,yes,yes

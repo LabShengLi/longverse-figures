@@ -23,7 +23,9 @@ dependencies:
   - r-patchwork
   - r-dplyr
   - r-readr
-  - r-irkernel
+  - rpy2
+  # rpy2 lets the four R panels be R cells in the same notebook as the Python ones, rather
+  # than R source held in a Python string and written to a file to run.
   - r-circlize
   - r-rcolorbrewer
   - r-tidyverse

@@ -33,6 +33,28 @@ a description does not converge on the original.
 
 `figures/RENDER_LOG.tsv` names, for every panel, which script drew it.
 
+## One notebook per figure, the code in the cell
+
+`notebooks/01_figure1.ipynb` through `08_gnas_region.ipynb`: one per figure, a cell per
+panel. The cell holds the paper's code and the panel appears underneath it. Edit a line and
+re-run and you get your edit, which is the point of opening a notebook rather than a PDF.
+
+The four R panels are R cells, not Python strings holding R. `rpy2`'s `%%R` magic runs them
+natively in the same kernel, so the code is highlighted, editable and runs as R. One line in
+each differs from the file on disk: the paper's scripts read their arguments with
+`commandArgs(trailingOnly = TRUE)` and a notebook has no command line, so that line becomes
+the vector it would have produced. The substitution is marked in the cell.
+
+The cells are generated from `scripts/paper/`, never typed. `python scripts/build_notebooks.py
+--check` verifies they still agree with it, which is how the first version's drift would
+have been caught.
+
+`00_all_figures.ipynb` is different: it calls `scripts/render_all.py` instead of re-running
+every cell. Under rpy2 all the R cells share one R session, while the paper's scripts each
+run in a fresh R process; running them together in one session let one leave a variable the
+next tripped over. The driver starts a process per script, so it is the faithful way to draw
+everything at once.
+
 ## Why the repository is small
 
 The figures are computed from whole-genome data: 60 million CpG sites per platform, BAMs in
