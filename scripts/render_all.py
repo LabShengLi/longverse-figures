@@ -158,6 +158,8 @@ FIGURE_PANELS: dict[str, tuple[str, str, str]] = {
     "fig2_ont_panel_wgbs_cov_agent":     ("ED Fig. 1", "a", "ed1a_agent_wgbs_by_coverage"),
     "ed1_cost_calling_panel_agent_cost": ("ED Fig. 1", "b", "ed1b_calling_agent_cost"),
     "ed1_cost_phasing_panel_agent_cost": ("ED Fig. 1", "b", "ed1b_phasing_agent_cost"),
+    "panel_icr_human":                   ("ED Fig. 1", "c", "ed1c_human_icr_chr20"),
+    "panel_icr_agent":                   ("ED Fig. 1", "c", "ed1c_agent_icr_chr20"),
 
     "ed2_pacbio_panel_hexbin_human_vs_wgbs": ("ED Fig. 2", "b", "ed2b_human_hexbin_vs_wgbs"),
     "ed2_pacbio_panel_hexbin_agent_vs_wgbs": ("ED Fig. 2", "b", "ed2b_agent_hexbin_vs_wgbs"),
@@ -189,6 +191,8 @@ NOT_PLACED = {
     "fig2_ont_panel_tss_profile", "fig2_ont_panel_wgbs_by_coverage",
     "ed2_pacbio_panel_tss_profile", "ed2_pacbio_panel_wgbs_by_coverage",
     "ed2_pacbio_panel_agent_cost", "ed3_pacbio_panel_agent_cost",
+    # both arms on one axis; the paper puts one arm on each side of panel c instead
+    "panel_icr_by_region",
 }
 
 
@@ -289,6 +293,18 @@ def main(outdir: str = None) -> int:
     print(f"    harvested {harvest('ed1_cost_calling', out)} files")
     pyrun("ED1 b cost, phasing", "make_cost_panel.py", ["figure3", "phasing_mcp_prompt"])
     print(f"    harvested {harvest('ed1_cost_phasing', out)} files")
+    # One per-region table per arm, 598 bytes each, so the paper's own script runs here.
+    pyrun("ED1 c imprinting regions", "make_icr_panel.py",
+          [str(DATA / "ed_fig1" / "c_icr_human_phasing.csv"),
+           str(DATA / "ed_fig1" / "c_icr_agent_phasing.csv"), str(out)])
+    # It writes its table to outdir.parent/source_data, which is where it sits beside the
+    # panel directory in the paper's tree. Here that is figures/, one level above this run.
+    stray = out.parent / "source_data"
+    if stray.is_dir():
+        (out / "source_data").mkdir(exist_ok=True)
+        for f in stray.iterdir():
+            f.replace(out / "source_data" / f.name)
+        stray.rmdir()
 
     print("== Extended Data Figs 2 and 3, the PacBio arms  (paper code)")
     # The paper runs these through fig_supp3/10_render_panels_nm.py, an orchestrator that

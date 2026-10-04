@@ -24,7 +24,7 @@ takes ten to fifteen minutes; after that it starts in about half a minute.
 | --- | --- |
 | `01_figure1` | Fig. 1e, f - three callers and their consensus |
 | `02_figure2` | Fig. 2a, b - one sentence reproduces the expert, ONT |
-| `03_extended_data_fig1` | ED Fig. 1a, b - the remaining ONT panels |
+| `03_extended_data_fig1` | ED Fig. 1a, b, c - the remaining ONT panels |
 | `04_extended_data_fig2` | ED Fig. 2 - PacBio calling |
 | `05_extended_data_fig3` | ED Fig. 3 - PacBio phasing |
 | `06_extended_data_fig4` | ED Fig. 4a-e - ONT, PacBio and WGBS across the genome |

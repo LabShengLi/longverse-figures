@@ -298,10 +298,12 @@ if chain:
 
 "03_extended_data_fig1": ("""# Extended Data Fig. 1
 
-The remaining ONT panels: agreement by read depth for each arm on its own, and what the
-agent consumed against the compute it set off.
+The remaining ONT panels: agreement by read depth for each arm on its own, what the agent
+consumed against the compute it set off, and the imprinting control regions on chromosome 20
+from each arm's own phasing run.
 
-The cost chart is `scripts/paper/make_cost_panel.py`, inlined below.""", [
+The cost chart is `scripts/paper/make_cost_panel.py` and the imprinting chart is
+`scripts/paper/make_icr_panel.py`, both inlined below.""", [
 
 ("## a - agreement with the bisulfite reference, each arm separately",
  cell_script("make_panels.py", ["figure2", "human_upstream", "agent_mcp_prompt"],
@@ -315,6 +317,17 @@ The cost chart is `scripts/paper/make_cost_panel.py`, inlined below.""", [
 ("## b - the same for the phasing run",
  cell_script("make_cost_panel.py", ["figure3", "phasing_mcp_prompt"],
              ["panel_agent_cost.png"], prefix="ed1_phasing", harvest_as="ed1_phasing")),
+
+("## c - the imprinting control regions on chromosome 20, one plot per arm\n\n"
+ "Each region is one row, the two haplotypes a pair of points joined by a line: an "
+ "imprinted region shows one haplotype near fully methylated and the other near "
+ "unmethylated, and a failed haplotype split would show both near the middle. The two "
+ "arms are drawn on the same axis and in the same row order, so a difference between the "
+ "two pictures would be a difference in the data. Both runs wrote the same numbers.",
+ cell_script("make_icr_panel.py",
+             ["{DATA}/ed_fig1/c_icr_human_phasing.csv",
+              "{DATA}/ed_fig1/c_icr_agent_phasing.csv", "{OUT}"],
+             ["panel_icr_human.png", "panel_icr_agent.png"])),
 ]),
 
 "04_extended_data_fig2": ("""# Extended Data Fig. 2
@@ -498,7 +511,7 @@ and the panel it drew appears underneath.
 | --- | --- |
 | `01_figure1.ipynb` | Figure 1e, f |
 | `02_figure2.ipynb` | Figure 2a, b |
-| `03_extended_data_fig1.ipynb` | ED Fig. 1a, b |
+| `03_extended_data_fig1.ipynb` | ED Fig. 1a, b, c |
 | `04_extended_data_fig2.ipynb` | ED Fig. 2, PacBio calling |
 | `05_extended_data_fig3.ipynb` | ED Fig. 3, PacBio phasing |
 | `06_extended_data_fig4.ipynb` | ED Fig. 4, across the genome |

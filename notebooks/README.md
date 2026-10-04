@@ -7,7 +7,7 @@ and the panel it drew appears underneath.
 | --- | --- |
 | `01_figure1.ipynb` | Figure 1e, f |
 | `02_figure2.ipynb` | Figure 2a, b |
-| `03_extended_data_fig1.ipynb` | ED Fig. 1a, b |
+| `03_extended_data_fig1.ipynb` | ED Fig. 1a, b, c |
 | `04_extended_data_fig2.ipynb` | ED Fig. 2, PacBio calling |
 | `05_extended_data_fig3.ipynb` | ED Fig. 3, PacBio phasing |
 | `06_extended_data_fig4.ipynb` | ED Fig. 4, across the genome |

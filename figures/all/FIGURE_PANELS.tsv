@@ -3,6 +3,8 @@ ED Fig. 1	a	ed1a_agent_wgbs_by_coverage	fig2_ont_panel_wgbs_cov_agent
 ED Fig. 1	a	ed1a_human_wgbs_by_coverage	fig2_ont_panel_wgbs_cov_human
 ED Fig. 1	b	ed1b_calling_agent_cost	ed1_cost_calling_panel_agent_cost
 ED Fig. 1	b	ed1b_phasing_agent_cost	ed1_cost_phasing_panel_agent_cost
+ED Fig. 1	c	ed1c_agent_icr_chr20	panel_icr_agent
+ED Fig. 1	c	ed1c_human_icr_chr20	panel_icr_human
 ED Fig. 2	b	ed2b_agent_tss_profile	ed2_pacbio_panel_tss_agent
 ED Fig. 2	b	ed2b_agent_wgbs_by_coverage	ed2_pacbio_panel_wgbs_cov_agent
 ED Fig. 2	b	ed2b_human_tss_profile	ed2_pacbio_panel_tss_human
@@ -23,7 +25,5 @@ Fig. 1	e	fig1e_consensus_vs_wgbs	panel_f_consensus
 Fig. 1	f	fig1f_consensus_by_coverage	panel_g_by_coverage
 Fig. 2	b	fig2b_agent_tss_profile	fig2_ont_panel_tss_agent
 Fig. 2	b	fig2b_human_tss_profile	fig2_ont_panel_tss_human
-Fig. 2	c	fig2c_gnas_agent_reference	panel_modbam_agent_GNAS
-Fig. 2	c	fig2c_gnas_human_reference	panel_modbam_human_GNAS
 Fig. 2	c	fig2c_gnas_ont	gnas_ont_20_60617123_60644527
 Fig. 2	c	fig2c_gnas_pacbio	gnas_pacbio_20_60617123_60644527

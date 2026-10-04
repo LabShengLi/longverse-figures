@@ -12,6 +12,7 @@ ED5 g CTCF profile	paper code: profile_nm.py	ok
 Fig 2b + ED1a ONT panels	paper code: make_panels.py	ok
 ED1 b cost, calling	paper code: make_cost_panel.py	ok
 ED1 b cost, phasing	paper code: make_cost_panel.py	ok
+ED1 c imprinting regions	paper code: make_icr_panel.py	ok
 ED2 PacBio calling panels	paper code: make_panels.py	ok
 ED3 PacBio phasing panels	paper code: make_panels.py	ok
 Fig 2c GNAS ont	paper code, R: modbam_region_plot.R	ok

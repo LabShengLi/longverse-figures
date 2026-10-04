@@ -16,3 +16,8 @@ figures/notebook/
 # NanoMethViz writes an RData alongside each region plot; it is 4 MB of plot object
 # that nothing in this repository reads.
 figures/**/*.RData
+
+# make_icr_panel.py writes its table one level above the output directory it is given,
+# which for a notebook run is figures/. render_all.py moves the batch copy into
+# figures/all/source_data; this is the one a single notebook leaves behind.
+figures/source_data/
