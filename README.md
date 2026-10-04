@@ -35,7 +35,7 @@ takes ten to fifteen minutes; after that it starts in about half a minute.
 The notebooks are committed with their figures, so they can be read on GitHub without
 running anything.
 
-## The code in the cells
+## The scripts
 
 Each cell holds the script that drew that panel, taken from the paper's repository. Edit a
 line and re-run and you get your edit.
@@ -47,7 +47,13 @@ scripts read their arguments from a command line and a notebook has none.
 Cells are generated from `scripts/paper/`, and `python scripts/build_notebooks.py --check`
 confirms they still match it.
 
-## Two names for a panel, and which is where
+Two panels do not run their script: ED Fig. 4a-c and ED Fig. 5h are drawn from the hexagons
+their own `hexbin()` call produced and exported, because the scripts for them read 450 MB and
+890 MB inputs. `figures/all/RENDER_LOG.tsv` says which panel was drawn which way. Where a
+command line is shown, absolute paths on the shared filesystem read `$LONGVERSE` and
+`$RESULTS`.
+
+## The location
 
 A panel script names its output after what it draws, because that is all it knows:
 `panel_f_consensus.png` is Figure 1e, and the novel imprinting heatmap is written by a script
@@ -78,24 +84,6 @@ The read slice was cut for this repository. The ninety imprinting control region
 1.02 Mb once padded, so the phased BAMs go from 85 GB and 53 GB to 38 and 19 MB per
 haplotype. Base qualities are dropped, since NanoMethViz reads the MM and ML tags.
 
-## Two panels drawn from exported values
-
-ED Fig. 4a-c and ED Fig. 5h are redrawn from the hexagons their own `hexbin()` call
-produced, exported once, because the scripts for them read 450 MB and 890 MB inputs. The
-binning is exact: 202,270 sites give hexagons whose counts sum to 202,270. Every other panel
-drawn here runs its script. `figures/RENDER_LOG.tsv` lists which is which. The eight exported
-region files are named `ed5_f_<region>`, the panel letter they carried when the export ran;
-the panel is h.
-
-## Two panels that are not here
-
-Fig. 2b puts two plots in each arm's frame and this repository draws the right-hand one. The
-left-hand one is a per-site hexbin whose script reads both arms' whole chromosome 20 per-site
-tables and the 540 MB bisulfite table. ED Fig. 1c, the chromosome 20 imprinting control
-regions, needs each arm's own per-region table from its pipeline run. Neither input is
-carried here, so `scripts/paper/make_hexbin_panel.py` and `scripts/paper/make_icr_panel.py`
-ship as the paper's code without a cell that calls them.
-
 ## Running it elsewhere
 
 ```bash
@@ -119,12 +107,3 @@ cannot change what the figures look like.
 
 The published chromosome 20 GNAS test set is 33 MB and runs the pipeline end to end in
 minutes: Zenodo record 23090404, pipeline at <https://github.com/LabShengLi/longverse>.
-
-## Notes
-
-Command lines shown in Figure 2a have their paths rewritten to `$LONGVERSE` and `$RESULTS`;
-they were absolute paths on a shared filesystem. Figure 2a is native PowerPoint text in the
-paper, so the notebook prints its content rather than redrawing it.
-
-`data/plot_layer/MANIFEST.tsv` records how many rows each exported file draws and how many
-it came from. `data/icr_bam/README.txt` records how the read slice was cut.
