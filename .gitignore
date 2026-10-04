@@ -7,6 +7,8 @@ __pycache__/
 # Panels that the paper's scripts write beside their run directory. render_all.py collects
 # them into figures/; shipping both copies would make the repository look reproduced.
 data/runs/**/panels/
-# Executed notebooks embed absolute paths from the machine that ran them. The repository
-# ships them unexecuted; figures/ holds the output.
+
+# The notebooks ARE committed with their outputs, so the figures show on GitHub without
+# anyone running anything. scripts/clean_notebook_outputs.py strips the machine paths out
+# of those outputs first.
 figures/notebook/

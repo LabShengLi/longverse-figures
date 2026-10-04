@@ -127,6 +127,34 @@ def cell_script(script: str, argv: list[str], shows: list[str], prefix=None,
     return head + body + tail
 
 
+
+def cell_rsource_argparser(script: str, argv: list[str], env: dict, shows: list[str]) -> str:
+    """An R cell for a script that parses with argparser instead of commandArgs.
+
+    argparser's parse_args(parser) reads the command line, and a notebook has no command
+    line, so the call is given the vector explicitly. One line, marked, as everywhere else.
+    """
+    src = r_source(script)
+    def rv(v):
+        if v.startswith("../data/"):
+            return f'file.path(Sys.getenv("LV_DATA"), "{v[len("../data/"):]}")'
+        if v.startswith("../figures/notebook"):
+            return 'Sys.getenv("LV_OUT")'
+        return f'"{v}"'
+    args = ", ".join(rv(a) for a in argv)
+    marker = "args <- parse_args(parser)"
+    if marker not in src:
+        raise KeyError(f"{script}: no parse_args line to substitute")
+    src = src.replace(
+        marker,
+        "## parse_args given its arguments directly; a notebook has no command line.\n"
+        f"args <- parse_args(parser, c({args}))", 1)
+    setenv = "\n".join(f'Sys.setenv({k} = {rv(v)})' for k, v in env.items()) if env else ""
+    head = (f"%%R\n## scripts/paper/{script}, run as R. Edit any line and re-run the cell.\n"
+            + (setenv + "\n\n" if setenv else "\n"))
+    return head + src, list(shows)
+
+
 def cell_rsource(script: str, argv: list[str], env: dict, shows: list[str]) -> str:
     """An R cell: the paper's R source, run natively by rpy2's %%R magic.
 
@@ -167,7 +195,7 @@ def cell_rsource(script: str, argv: list[str], env: dict, shows: list[str]) -> s
     head = (f"%%R\n"
             f"## scripts/paper/{script}, run as R. Edit any line and re-run the cell.\n"
             f"{setenv}\n\n")
-    return head + src
+    return head + src, list(shows)
 
 
 def cell_r_rerun(script: str, argv: list[str], env: dict, shows: list[str]) -> str:
@@ -220,7 +248,9 @@ show different panels from that run.""", [
  cell_script("make_panels.py", ["figure2", "human_upstream", "agent_mcp_prompt"],
              ["panel_tss_profile.png"], prefix="fig2_ont", harvest_as="fig2_ont")),
 
-("## Figure 2b - agreement with the bisulfite reference, by read depth",
+("## Figure 2b - agreement with the bisulfite reference, by read depth\n\n"
+ "Written by the same run as the cell above: that script draws several panels in one "
+ "pass, so this cell only shows another of them.",
  'show("panel_wgbs_by_coverage.png", prefix="fig2_ont")'),
 
 ("## Figure 2a - what the two arms were given\n\n"
@@ -256,8 +286,8 @@ The cost chart is `scripts/paper/make_cost_panel.py`, inlined below.""", [
              ["panel_agent_cost.png"], prefix="ed1_calling", harvest_as="ed1_calling")),
 
 ("## b - the same for the phasing run",
- 'paper_py("make_cost_panel.py", ["figure3", "phasing_mcp_prompt"])\n'
- 'harvest("ed1_phasing")\nshow("panel_agent_cost.png", prefix="ed1_phasing")'),
+ cell_script("make_cost_panel.py", ["figure3", "phasing_mcp_prompt"],
+             ["panel_agent_cost.png"], prefix="ed1_phasing", harvest_as="ed1_phasing")),
 ]),
 
 "04_extended_data_fig2": ("""# Extended Data Fig. 2
@@ -268,13 +298,15 @@ The paper runs this through an orchestrator that stages a run tree and a 540 MB 
 table first. What draws is `make_panels.py`, the same script as Figure 2, so it is called
 here with the PacBio labels.""", [
 
-("## The two PacBio calling arms",
- 'paper_py("make_panels.py", ["figure2", "supp3_human", "supp3_agent"],\n'
- '         env={"PANEL_PLATFORM": "PacBio"})\n'
- 'print(harvest("ed2"), "panels collected")\n'
- 'show("panel_tss_profile.png", prefix="ed2")'),
+("## The two PacBio calling arms\n\n"
+ "The same script as Figure 2, inlined again here so this notebook reads on its own, "
+ "with the PacBio labels and PANEL_PLATFORM set so the axes say PacBio.",
+ 'import os\nos.environ["PANEL_PLATFORM"] = "PacBio"\n\n'
+ + cell_script("make_panels.py", ["figure2", "supp3_human", "supp3_agent"],
+               ["panel_tss_profile.png"], prefix="ed2", harvest_as="ed2")),
 
-("## b - agreement with the bisulfite reference by read depth",
+("## b - agreement with the bisulfite reference by read depth\n\n"
+ "Another panel from the same pass as the cell above.",
  'show("panel_wgbs_by_coverage.png", prefix="ed2")'),
 ]),
 
@@ -282,11 +314,11 @@ here with the PacBio labels.""", [
 
 PacBio phasing and per-haplotype methylation.""", [
 
-("## The two PacBio phasing arms",
- 'paper_py("make_panels.py", ["figure3", "supp4_human", "supp4_agent"],\n'
- '         env={"PANEL_PLATFORM": "PacBio"})\n'
- 'print(harvest("ed3"), "panels collected")\n'
- 'show("panel_icr_haplotype.png", prefix="ed3")'),
+("## The two PacBio phasing arms\n\n"
+ "The same script again, on the phasing arms.",
+ 'import os\nos.environ["PANEL_PLATFORM"] = "PacBio"\n\n'
+ + cell_script("make_panels.py", ["figure3", "supp4_human", "supp4_agent"],
+               ["panel_icr_haplotype.png"], prefix="ed3", harvest_as="ed3")),
 ]),
 
 "06_extended_data_fig4": ("""# Extended Data Fig. 4
@@ -370,9 +402,10 @@ Coverage and regional agreement between ONT and PacBio.""", [
              ["tss_profile_nm.png"])),
 
 ("## e - CTCF, the same script with the other input",
- 'paper_py("profile_nm.py", [str(DATA / "ed_fig5" / "CTCF_profile_3track_nozero_data.tsv"),\n'
- '                           str(OUT / "ctcf_profile_nm"), "CTCF site", "2000"])\n'
- 'show("ctcf_profile_nm.png")'),
+ cell_script("profile_nm.py",
+             ["{DATA}/ed_fig5/CTCF_profile_3track_nozero_data.tsv",
+              "{OUT}/ctcf_profile_nm", "CTCF site", "2000"],
+             ["ctcf_profile_nm.png"])),
 
 ("## f - ONT against PacBio within eight genomic region classes\n\n"
  "**Not the paper's drawing code**, for the same reason as Extended Data Fig. 4a-c: the "
@@ -393,48 +426,31 @@ plt.close(fig)
 show("ed5f_region_hexbins.png")'''),
 ]),
 
-"08_gnas_region": ("""# Figure 2c and Extended Data Fig. 1c - GNAS, per haplotype
+"08_gnas_region": ('''# Figure 2c and Extended Data Fig. 1c - GNAS, per haplotype
 
-Drawn by NanoMethViz from the phased reads. The whole-genome BAMs are 85 GB and 53 GB; cut
-to the ninety imprinting control regions they are 38 and 19 MB per haplotype, which is what
-`data/icr_bam/` holds.
+Drawn by NanoMethViz from the phased reads. The whole-genome BAMs are 85 GB and 53 GB;
+cut to the ninety imprinting control regions they are 38 and 19 MB per haplotype, which
+is what `data/icr_bam/` holds.
 
 NanoMethViz is installed from Bioconductor at build time, because bioconda carries only
-2.4.0 against the 3.2.0 the paper used. That is a source build and it can fail; if it did,
-the cells fall back to the figure the paper's own run produced and say so.""", [
+2.4.0 against the 3.2.0 the paper used. That is a source build and it can fail. The first
+cell says which of the two you are looking at.''', [
 
-("## GNAS, ONT",
- '''ICR = DATA / "icr_bam"
-GNAS = ("chr20", "60617123", "60644527")
+("## Is NanoMethViz in this environment?", 'if have_r_package("NanoMethViz"):\n    print("yes: the cells below draw the panels from data/icr_bam/")\nelse:\n    print("no: the R cells below will stop. Use the last cell, which shows")\n    print("the figure the paper\'s own run produced.")'),
 
-if have_r_package("NanoMethViz"):
-    paper_r("modbam_region_plot.R",
-            ["--hp1_bam", str(ICR / "hg002_ont_icr_HP1.bam"),
-             "--hp2_bam", str(ICR / "hg002_ont_icr_HP2.bam"),
-             "--chr", GNAS[0], "--start", GNAS[1], "--end", GNAS[2],
-             "--gtf_file", str(ICR / "hs1.ncbiRefSeq.icr.gtf"),
-             "--outdir", str(OUT), "--outfn_prefix", "gnas_ont",
-             "--fig_w", "7", "--fig_h", "6"])
-    show("gnas_ont.png")
-else:
-    print("NanoMethViz is not in this environment.")
-    print("Showing the figure the paper's own run produced, not a redraw.")
-    from IPython.display import Image, display
-    display(Image(filename="../data/reference_panels/panel_modbam_human_GNAS.png"))'''),
+("## GNAS, ONT\n\n"
+ "The paper's NanoMethViz script, inlined. `parse_args` is given its arguments "
+ "directly because a notebook has no command line; that one line is marked in the code.",
+ cell_rsource_argparser("modbam_region_plot.R", ['--hp1_bam', '../data/icr_bam/hg002_ont_icr_HP1.bam', '--hp2_bam', '../data/icr_bam/hg002_ont_icr_HP2.bam', '--chr', 'chr20', '--start', '60617123', '--end', '60644527', '--gtf_file', '../data/icr_bam/hs1.ncbiRefSeq.icr.gtf', '--outdir', '../figures/notebook', '--outfn_prefix', 'gnas_ont', '--fig_w', '7', '--fig_h', '6'], {}, ["gnas_ont.png"])),
 
-("## GNAS, PacBio",
- '''if have_r_package("NanoMethViz"):
-    paper_r("modbam_region_plot.R",
-            ["--hp1_bam", str(ICR / "hg002_pacbio_icr_HP1.bam"),
-             "--hp2_bam", str(ICR / "hg002_pacbio_icr_HP2.bam"),
-             "--chr", GNAS[0], "--start", GNAS[1], "--end", GNAS[2],
-             "--gtf_file", str(ICR / "hs1.ncbiRefSeq.icr.gtf"),
-             "--outdir", str(OUT), "--outfn_prefix", "gnas_pacbio",
-             "--fig_w", "7", "--fig_h", "6"])
-    show("gnas_pacbio.png")
-else:
-    from IPython.display import Image, display
-    display(Image(filename="../data/reference_panels/panel_modbam_agent_GNAS.png"))'''),
+("## GNAS, PacBio\n\n"
+ "The same script, the other platform's reads.",
+ cell_rsource_argparser("modbam_region_plot.R", ['--hp1_bam', '../data/icr_bam/hg002_pacbio_icr_HP1.bam', '--hp2_bam', '../data/icr_bam/hg002_pacbio_icr_HP2.bam', '--chr', 'chr20', '--start', '60617123', '--end', '60644527', '--gtf_file', '../data/icr_bam/hs1.ncbiRefSeq.icr.gtf', '--outdir', '../figures/notebook', '--outfn_prefix', 'gnas_pacbio', '--fig_w', '7', '--fig_h', '6'], {}, ["gnas_pacbio.png"])),
+
+("## If NanoMethViz is not here\n\n"
+ "The figures the paper's own run produced, included so the repository shows every "
+ "panel. These are **not** a redraw.",
+ 'from IPython.display import Image, display\nfor n in ("panel_modbam_human_GNAS.png", "panel_modbam_agent_GNAS.png"):\n    display(Image(filename=f"../data/reference_panels/{n}"))'),
 ]),
 }
 
@@ -489,7 +505,13 @@ def main(outdir="notebooks", check=False):
             if not p.is_file():
                 print(f"  MISSING {p.name}"); bad += 1; continue
             have = json.loads(p.read_text())
-            want = [code(c)["source"] for _h, c in panels]
+            want = []
+            for _h, c in panels:
+                if isinstance(c, tuple):
+                    want += [code(c[0])["source"],
+                             code("show(" + ", ".join(repr(x) for x in c[1]) + ")")["source"]]
+                else:
+                    want.append(code(c)["source"])
             got = [c["source"] for c in have["cells"] if c["cell_type"] == "code"][1:]
             if got != want:
                 print(f"  DRIFTED {p.name}: a cell no longer matches scripts/paper/")
@@ -507,10 +529,19 @@ def main(outdir="notebooks", check=False):
     everything = [md("# Every figure, in one run\n\nThis runs `scripts/render_all.py`, which starts a fresh process per script, exactly as\nthe paper does. To read the code that draws a figure, open that figure's own notebook:\nthe code is in the cells there.\n"), code('import subprocess, sys\nr = subprocess.run([sys.executable, "../scripts/render_all.py", "../figures/notebook"],\n                   capture_output=True, text=True)\nprint(r.stdout[-4000:])\nif r.returncode != 0:\n    print("STDERR:", r.stderr[-1500:])'), code('import pandas as pd\nfrom IPython.display import display, Markdown\nlog = pd.read_csv("../figures/notebook/RENDER_LOG.tsv", sep="\\t")\ndisplay(Markdown("### What drew each panel"))\ndisplay(log)'), code('from IPython.display import Image, display, Markdown\nfrom pathlib import Path\nfor p in sorted(Path("../figures/notebook").glob("*.png")):\n    display(Markdown(f"**{p.name}**"))\n    display(Image(filename=str(p)))')]
     for name, (intro, panels) in B.items():
         cells = [md(intro), code(SETUP)]
+    # A %%R cell is R all the way down, so the panel it wrote is displayed by a Python
+    # cell after it. Dropping that when the R cells were converted to %%R is why Extended
+    # Data Fig. 4 came back with one embedded image instead of five: the scripts had run
+    # and written their files, and nothing showed them.
         for heading, body in panels:
-            cells += [md(heading), code(body)]
+            if isinstance(body, tuple):
+                rcode, shows = body
+                cells += [md(heading), code(rcode),
+                          code("show(" + ", ".join(repr(x) for x in shows) + ")")]
+            else:
+                cells += [md(heading), code(body)]
         (out / f"{name}.ipynb").write_text(json.dumps(nb(cells), indent=1))
-        n_lines = sum(len(c.splitlines()) for _h, c in panels)
+        n_lines = sum(len((c[0] if isinstance(c, tuple) else c).splitlines()) for _h, c in panels)
         print(f"  {name}.ipynb  {len(panels)} cells, {n_lines} lines of the paper's code")
     (out / "00_all_figures.ipynb").write_text(json.dumps(nb(everything), indent=1))
     (out / "README.md").write_text(INDEX)
