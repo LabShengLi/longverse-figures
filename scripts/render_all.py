@@ -87,7 +87,7 @@ def pyrun(panel: str, script: str, args: list[str], env: dict | None = None):
 def harvest(prefix: str, out: Path) -> int:
     """Move what a run just wrote beside the run directory into out/, under a prefix.
 
-    make_panels.py writes to RUN/<which>/panels, where <which> is figure2 or figure3. The
+    fig2_ed1_ed2_ed3_make_panels.py writes to RUN/<which>/panels, where <which> is figure2 or figure3. The
     ONT arms and the PacBio arms both use those two names, so running one after the other
     overwrites the first: the ONT tss profile came back with a supp3_agent column. Harvest
     immediately, prefix by display item, and clear the directory so the next run cannot
@@ -109,7 +109,7 @@ def harvest(prefix: str, out: Path) -> int:
 def collect(stage: Path, prefix: str, out: Path) -> int:
     """Move a staged run's output into out/ under a prefix.
 
-    Two runs of make_hexbin_panel.py, and two of make_icr_panel.py, write the same file
+    Two runs of fig2b_ed2b_hexbin_vs_wgbs.py, and two of fig2c_ed1c_ed3b_icr_panel.py, write the same file
     names: one pair is ONT and the other PacBio, one pair is Extended Data Fig. 1c and the
     other 3b. Each is given its own directory and the files are moved out under a prefix
     rather than the script being asked to name them differently, which would be an edit to
@@ -157,81 +157,11 @@ def rscript(panel: str, script: str, args: list[str], env: dict | None = None):
 #
 # The paper's scripts name a file after what it draws, because that is all they know:
 # panel_f_consensus.png is Figure 1e, and the novel imprinting heatmap is written by a script
-# that lives in a directory called fig_ed4 and is Extended Data Fig. 5d. A reader of this
-# directory needs the figure and the letter, so the batch render puts them in the name. The
-# per-notebook output under figures/notebook keeps the script's own name: there the point is
-# that the cell above wrote exactly that file.
+# that lives in a directory called fig_ed4 and is Extended Data Fig. 5d. A reader needs the
+# figure and the letter, so every output here, from the batch render and from the notebooks
+# alike, carries them (panel_names.py); FIGURE_PANELS.tsv keeps the script's own name beside it.
 #
-# produced stem -> (figure, panel, new stem)
-FIGURE_PANELS: dict[str, tuple[str, str, str]] = {
-    "panel_f_consensus":                 ("Fig. 1", "e", "fig1e_consensus_vs_wgbs"),
-    "panel_g_by_coverage":               ("Fig. 1", "f", "fig1f_consensus_by_coverage"),
-
-    "fig2_ont_panel_tss_human":          ("Fig. 2", "b", "fig2b_human_tss_profile"),
-    "fig2_ont_panel_tss_agent":          ("Fig. 2", "b", "fig2b_agent_tss_profile"),
-    "fig2_ont_panel_hexbin_human_vs_wgbs": ("Fig. 2", "b", "fig2b_human_hexbin_vs_wgbs"),
-    "fig2_ont_panel_hexbin_agent_vs_wgbs": ("Fig. 2", "b", "fig2b_agent_hexbin_vs_wgbs"),
-    "fig2c_human_GNAS":                  ("Fig. 2", "c", "fig2c_human_gnas_modbam"),
-    "fig2c_agent_GNAS":                  ("Fig. 2", "c", "fig2c_agent_gnas_modbam"),
-    # Not Figure 2c. Figure 2c is the two ONT chromosome 20 arms, each drawn from its own
-    # phasing run; Extended Data Fig. 3b is the same for PacBio. data/icr_bam holds the
-    # whole-genome phased reads of the sample, so what these two draw is the region plot
-    # the paper's two panels use, on the sample rather than on an arm. The arms' own BAMs
-    # are not here. Named for what they are.
-    "gnas_ont_20_60617123_60644527":     ("-", "-", "gnas_ont_whole_sample"),
-    "gnas_pacbio_20_60617123_60644527":  ("-", "-", "gnas_pacbio_whole_sample"),
-    # only written when NanoMethViz is absent and the paper's own output is copied in
-    "panel_modbam_human_GNAS":           ("Fig. 2", "c", "fig2c_human_gnas_from_the_paper"),
-    "panel_modbam_agent_GNAS":           ("Fig. 2", "c", "fig2c_agent_gnas_from_the_paper"),
-
-    "fig2_ont_panel_wgbs_cov_human":     ("ED Fig. 1", "a", "ed1a_human_wgbs_by_coverage"),
-    "fig2_ont_panel_wgbs_cov_agent":     ("ED Fig. 1", "a", "ed1a_agent_wgbs_by_coverage"),
-    "ed1_cost_calling_panel_agent_cost": ("ED Fig. 1", "b", "ed1b_calling_agent_cost"),
-    "ed1_cost_phasing_panel_agent_cost": ("ED Fig. 1", "b", "ed1b_phasing_agent_cost"),
-    "panel_icr_human":                   ("ED Fig. 1", "c", "ed1c_human_icr_chr20"),
-    "panel_icr_agent":                   ("ED Fig. 1", "c", "ed1c_agent_icr_chr20"),
-
-    "ed2_pacbio_panel_hexbin_human_vs_wgbs": ("ED Fig. 2", "b", "ed2b_human_hexbin_vs_wgbs"),
-    "ed2_pacbio_panel_hexbin_agent_vs_wgbs": ("ED Fig. 2", "b", "ed2b_agent_hexbin_vs_wgbs"),
-    "ed2_pacbio_panel_wgbs_cov_human":   ("ED Fig. 2", "b", "ed2b_human_wgbs_by_coverage"),
-    "ed2_pacbio_panel_wgbs_cov_agent":   ("ED Fig. 2", "b", "ed2b_agent_wgbs_by_coverage"),
-    "ed2_pacbio_panel_tss_human":        ("ED Fig. 2", "b", "ed2b_human_tss_profile"),
-    "ed2_pacbio_panel_tss_agent":        ("ED Fig. 2", "b", "ed2b_agent_tss_profile"),
-    "ed2_pacbio_cost_panel_agent_cost":  ("ED Fig. 2", "a", "ed2a_agent_cost"),
-
-    "ed3_pacbio_cost_panel_agent_cost":  ("ED Fig. 3", "a", "ed3a_agent_cost"),
-    "ed3b_human_GNAS":                   ("ED Fig. 3", "b", "ed3b_human_gnas_modbam"),
-    "ed3b_agent_GNAS":                   ("ED Fig. 3", "b", "ed3b_agent_gnas_modbam"),
-    "ed3_pacbio_panel_icr_human":        ("ED Fig. 3", "b", "ed3b_human_icr_chr20"),
-    "ed3_pacbio_panel_icr_agent":        ("ED Fig. 3", "b", "ed3b_agent_icr_chr20"),
-
-    "ed4abc_hexbins":                    ("ED Fig. 4", "a-c", "ed4abc_hexbins"),
-    "Ideogram_dmr_t2t_hg002_ont_blue":   ("ED Fig. 4", "d", "ed4d_ont_haplotype_dmr_ideogram"),
-    "Ideogram_dmr_t2t_hg002_pacbio_blue":("ED Fig. 4", "e", "ed4e_pacbio_haplotype_dmr_ideogram"),
-
-    "venn_cov5_nm":                      ("ED Fig. 5", "a", "ed5a_cpg_sites_venn"),
-    "coverage_hist_nm":                  ("ED Fig. 5", "b", "ed5b_coverage_hist"),
-    "hp_diff_by_region_nm":              ("ED Fig. 5", "c", "ed5c_hp_diff_by_region"),
-    "icr_heatmap_novel_nm":              ("ED Fig. 5", "d", "ed5d_icr_novel_heatmap"),
-    "icr_heatmap_known_nm":              ("ED Fig. 5", "e", "ed5e_icr_known_heatmap"),
-    "tss_profile_nm":                    ("ED Fig. 5", "f", "ed5f_tss_profile"),
-    "ctcf_profile_nm":                   ("ED Fig. 5", "g", "ed5g_ctcf_profile"),
-    "ed5h_region_hexbins":               ("ED Fig. 5", "h", "ed5h_region_hexbins"),
-}
-
-# Rendered, and not placed in any figure: the two-arms-in-one versions of panels the paper
-# draws one arm at a time. Kept, because they are what the script produces, but out of the
-# way so that what is left in figures/all is the figures.
-NOT_PLACED = {
-    "fig2_ont_panel_tss_profile", "fig2_ont_panel_wgbs_by_coverage",
-    "ed2_pacbio_panel_tss_profile", "ed2_pacbio_panel_wgbs_by_coverage",
-    "ed2_pacbio_panel_agent_cost", "ed3_pacbio_panel_agent_cost",
-    # both arms on one axis; the paper puts one arm on each side instead
-    "panel_icr_by_region", "ed3_pacbio_panel_icr_by_region", "ed3_pacbio_panel_icr_haplotype",
-    # the three-panel hexbin sheet; the paper places the two singles from it
-    "fig2_ont_panel_hexbin_vs_wgbs", "fig2_ont_panel_hexbin_human_vs_agent",
-    "ed2_pacbio_panel_hexbin_vs_wgbs", "ed2_pacbio_panel_hexbin_human_vs_agent",
-}
+from panel_names import FIGURE_PANELS, NOT_PLACED  # noqa: E402
 
 
 def name_by_figure(out: Path, since: float = 0.0) -> list[tuple[str, str, str, str]]:
@@ -273,7 +203,7 @@ def name_by_figure(out: Path, since: float = 0.0) -> list[tuple[str, str, str, s
 
 
 def main(outdir: str = None) -> int:
-    # Absolute, always. ideogram_dmr_blue.R does setwd(IDEOGRAM_WDIR) before it draws, so a
+    # Absolute, always. ed4de_dmr_ideogram.R does setwd(IDEOGRAM_WDIR) before it draws, so a
     # relative output path stops pointing where the caller meant and cairo reports it as
     # "error while writing to output stream", which reads like a graphics fault rather than
     # a path one.
@@ -283,13 +213,13 @@ def main(outdir: str = None) -> int:
     os.environ["PANEL_OUT_DIR"] = str(out)
 
     print("== Figure 1 e,f  (paper code)")
-    # fig1_bc/10_render_ef_panels.sbatch sets these three, and consensus_panels.py reads
+    # fig1_bc/10_render_ef_panels.sbatch sets these three, and fig1ef_consensus_panels.py reads
     # all of them when it is imported, so they go in before load(). 3.35 in and not 3.5
     # because the tight crop counts f's legend above the axes into the width.
     os.environ.setdefault("PANEL_FIG_W", "3.35")
     os.environ.setdefault("PANEL_FIG_H_SCALE", "1.15")
     os.environ.setdefault("PANEL_LEGEND_ABOVE", "1")
-    cp = load("consensus_panels", PAPER / "consensus_panels.py")
+    cp = load("fig1ef_consensus_panels", PAPER / "fig1ef_consensus_panels.py")
     record("Fig 1e consensus", "paper code", cp.panel_f_consensus)
     record("Fig 1f by coverage", "paper code", cp.panel_g_by_coverage)
 
@@ -298,18 +228,18 @@ def main(outdir: str = None) -> int:
     # where the paper's own build_ed5.py reads them from as well.
     print("== Extended Data Fig. 5 d,e  imprinting heatmaps (paper code, R)")
     merged = DATA / "ed_fig4" / "hg002_ONT_Pacbio_merged_with_annotation.mincov5.inner.csv"
-    rscript("ED5 d,e ICR heatmaps", "icr_heatmap_nm.R",
+    rscript("ED5 d,e ICR heatmaps", "ed5de_icr_heatmaps.R",
             [str(merged), str(DATA / "ed_fig4"), str(out)], {"ICR_BASE_PT": "7"})
 
     print("== Extended Data Fig. 5c  haplotype difference boxplot (paper code, R)")
-    rscript("ED5 c HP difference", "boxplot_nm.R",
+    rscript("ED5 c HP difference", "ed5c_hp_diff_by_region.R",
             [str(merged), str(out)], {"ICR_BASE_PT": "7"})
 
     print("== Extended Data Fig. 4 d,e  DMR ideograms (paper code, R)")
     for key, plat in (("ed4_d_ont", "ont"), ("ed4_e_pacbio", "pacbio")):
         wdir = DATA / "ed_fig4" / "dmr" / plat
         rscript(f"ED4 {'d' if plat == 'ont' else 'e'} ideogram {plat}",
-                "ideogram_dmr_blue.R", [plat, str(out)],
+                "ed4de_dmr_ideogram.R", [plat, str(out)],
                 # fig_ed4/15_ideograms_wide.sbatch. The legend under the plot buys the
                 # karyogram about 3.3 in of a 3.52 in canvas; 6.5 in of height is what the
                 # heatmaps leaving this figure freed; and the point size carries the canvas
@@ -323,27 +253,27 @@ def main(outdir: str = None) -> int:
                  "IDEOGRAM_POINT_SIZE": "0.0044"})
 
     print("== Extended Data Fig. 5 a,b,f,g  (paper code)")
-    pyrun("ED5 a Venn", "venn_nm.py",
+    pyrun("ED5 a Venn", "ed5a_cpg_venn.py",
           [str(DATA / "ed_fig5" / "A_venn_covered_cpg_cov5_stats.tsv"), str(out / "venn_cov5_nm")])
-    pyrun("ED5 b coverage histogram", "coverage_hist_nm.py",
+    pyrun("ED5 b coverage histogram", "ed5b_coverage_hist.py",
           [str(DATA / "ed_fig5"), str(out / "coverage_hist_nm")])
-    pyrun("ED5 f TSS profile", "profile_nm.py",
+    pyrun("ED5 f TSS profile", "ed5fg_tss_ctcf_profiles.py",
           [str(DATA / "ed_fig5" / "TSS_profile_3track_nozero_data.tsv"),
            str(out / "tss_profile_nm"), "TSS", "2000"])
-    pyrun("ED5 g CTCF profile", "profile_nm.py",
+    pyrun("ED5 g CTCF profile", "ed5fg_tss_ctcf_profiles.py",
           [str(DATA / "ed_fig5" / "CTCF_profile_3track_nozero_data.tsv"),
            str(out / "ctcf_profile_nm"), "CTCF site", "2000"])
 
     print("== Figure 2 b,c and Extended Data Fig. 1  (paper code)")
-    pyrun("Fig 2b + ED1a ONT panels", "make_panels.py",
+    pyrun("Fig 2b + ED1a ONT panels", "fig2_ed1_ed2_ed3_make_panels.py",
           ["figure2", "human_upstream", "agent_mcp_prompt"])
     print(f"    harvested {harvest('fig2_ont', out)} files")
-    pyrun("ED1 b cost, calling", "make_cost_panel.py", ["figure2", "upstream_mcp_prompt"])
+    pyrun("ED1 b cost, calling", "ed1b_ed2a_ed3a_agent_cost.py", ["figure2", "upstream_mcp_prompt"])
     print(f"    harvested {harvest('ed1_cost_calling', out)} files")
-    pyrun("ED1 b cost, phasing", "make_cost_panel.py", ["figure3", "phasing_mcp_prompt"])
+    pyrun("ED1 b cost, phasing", "ed1b_ed2a_ed3a_agent_cost.py", ["figure3", "phasing_mcp_prompt"])
     print(f"    harvested {harvest('ed1_cost_phasing', out)} files")
     # One per-region table per arm, 598 bytes each, so the paper's own script runs here.
-    pyrun("ED1 c imprinting regions", "make_icr_panel.py",
+    pyrun("ED1 c imprinting regions", "fig2c_ed1c_ed3b_icr_panel.py",
           [str(DATA / "ed_fig1" / "c_icr_human_phasing.csv"),
            str(DATA / "ed_fig1" / "c_icr_agent_phasing.csv"), str(out)])
     # It writes its table to outdir.parent/source_data, which is where it sits beside the
@@ -360,26 +290,26 @@ def main(outdir: str = None) -> int:
     # genome in the paper and a chr20 slice here, 13 MB instead of 515.
     HEX = DATA / "hexbin_chr20"
     s = out / "_stage_fig2b"; s.mkdir(exist_ok=True)
-    pyrun("Fig 2b hexbins vs WGBS", "make_hexbin_panel.py",
+    pyrun("Fig 2b hexbins vs WGBS", "fig2b_ed2b_hexbin_vs_wgbs.py",
           [str(HEX / "ont_human_chr20_persite_cov1.bed.gz"),
            str(HEX / "ont_agent_chr20_persite_cov1.bed.gz"),
            str(HEX / "wgbs_chr20.bismark.cov.gz"), str(s)])
     print(f"    collected {collect(s, 'fig2_ont_', out)} files")
 
     print("== Extended Data Figs 2 and 3, the PacBio arms  (paper code)")
-    pyrun("ED2 a cost", "make_cost_panel.py", ["ed2_cost", "pacbio_calling"])
+    pyrun("ED2 a cost", "ed1b_ed2a_ed3a_agent_cost.py", ["ed2_cost", "pacbio_calling"])
     print(f"    harvested {harvest('ed2_pacbio_cost', out)} files")
-    pyrun("ED3 a cost", "make_cost_panel.py", ["ed3_cost", "pacbio_phasing"])
+    pyrun("ED3 a cost", "ed1b_ed2a_ed3a_agent_cost.py", ["ed3_cost", "pacbio_phasing"])
     print(f"    harvested {harvest('ed3_pacbio_cost', out)} files")
     s = out / "_stage_ed2b"; s.mkdir(exist_ok=True)
-    pyrun("ED2 b hexbins vs WGBS", "make_hexbin_panel.py",
+    pyrun("ED2 b hexbins vs WGBS", "fig2b_ed2b_hexbin_vs_wgbs.py",
           [str(HEX / "pacbio_human_chr20_persite_cov1.bed.gz"),
            str(HEX / "pacbio_agent_chr20_persite_cov1.bed.gz"),
            str(HEX / "wgbs_chr20.bismark.cov.gz"), str(s)],
           {"PANEL_PLATFORM": "PacBio"})
     print(f"    collected {collect(s, 'ed2_pacbio_', out)} files")
     s = out / "_stage_ed3b"; s.mkdir(exist_ok=True)
-    pyrun("ED3 b imprinting regions", "make_icr_panel.py",
+    pyrun("ED3 b imprinting regions", "fig2c_ed1c_ed3b_icr_panel.py",
           [str(DATA / "ed_fig3" / "b_icr_human_phasing.csv"),
            str(DATA / "ed_fig3" / "b_icr_agent_phasing.csv"), str(s)])
     print(f"    collected {collect(s, 'ed3_pacbio_', out)} files")
@@ -389,10 +319,10 @@ def main(outdir: str = None) -> int:
     # modules are what draw, and they read the per-run evaluation records, which are here.
     # So they are called directly, with the PacBio labels, rather than reproducing the
     # staging.
-    pyrun("ED2 PacBio calling panels", "make_panels.py",
+    pyrun("ED2 PacBio calling panels", "fig2_ed1_ed2_ed3_make_panels.py",
           ["figure2", "supp3_human", "supp3_agent"], {"PANEL_PLATFORM": "PacBio"})
     print(f"    harvested {harvest('ed2_pacbio', out)} files")
-    pyrun("ED3 PacBio phasing panels", "make_panels.py",
+    pyrun("ED3 PacBio phasing panels", "fig2_ed1_ed2_ed3_make_panels.py",
           ["figure3", "supp4_human", "supp4_agent"], {"PANEL_PLATFORM": "PacBio"})
     print(f"    harvested {harvest('ed3_pacbio', out)} files")
 
@@ -420,14 +350,14 @@ def main(outdir: str = None) -> int:
         for fig, plat, arm in (("fig2c", "ont", "human"), ("fig2c", "ont", "agent"),
                                ("ed3b", "pacbio", "human"), ("ed3b", "pacbio", "agent")):
             stem = f"{fig}_{plat}_{arm}"
-            rscript(f"{'Fig 2c' if fig == 'fig2c' else 'ED3 b'} GNAS {arm}", "modbam_region_plot.R",
+            rscript(f"{'Fig 2c' if fig == 'fig2c' else 'ED3 b'} GNAS {arm}", "fig2c_ed3b_gnas_region_plot.R",
                     ["--hp1_bam", str(GA / f"{stem}_HP1.bam"), "--hp2_bam", str(GA / f"{stem}_HP2.bam"),
                      "--chr", "chr20", "--start", "60622123", "--end", "60626697",
                      "--flank", "3000", "--gtf_file", str(icr / "hs1.ncbiRefSeq.icr.gtf"),
                      "--outdir", str(out), "--outfn_prefix", f"{fig}_{arm}",
                      "--tagname", "GNAS", "--fig_w", "7", "--fig_h", "6", "--png"])
         for plat in ("ont", "pacbio"):
-            rscript(f"GNAS region plot, {plat}", "modbam_region_plot.R",
+            rscript(f"GNAS region plot, {plat}", "fig2c_ed3b_gnas_region_plot.R",
                     ["--hp1_bam", str(icr / f"hg002_{plat}_icr_HP1.bam"),
                      "--hp2_bam", str(icr / f"hg002_{plat}_icr_HP2.bam"),
                      "--chr", gnas[0], "--start", str(gnas[1]), "--end", str(gnas[2]),
@@ -478,7 +408,7 @@ def main(outdir: str = None) -> int:
     # back to it. The panel is h.
     record("ED5 h region hexbins", "exported hexagons", regionfig)
 
-    # make_panels.py and make_cost_panel.py write beside their run directory, as they do in
+    # fig2_ed1_ed2_ed3_make_panels.py and ed1b_ed2a_ed3a_agent_cost.py write beside their run directory, as they do in
     # the paper repository; PANEL_OUT_DIR is only honoured by the panel scripts that were
     # written for the poster. Collect what they produced rather than patching where they
     # put it, which would be an edit to the paper's code.

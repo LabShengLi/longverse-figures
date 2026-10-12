@@ -5,13 +5,13 @@ code. The drawing lives in scripts/paper/, copied from the paper's repository; e
 here is plumbing: set the roots, run the script the way the paper runs it, display what it
 wrote.
 
-render_all.py imports the same functions, so the notebook and the batch render cannot
+render_all.py imports the same functions and the same name table, so the notebook and the batch render cannot
 disagree about how a panel is produced.
 
     from nbkit import setup, paper_py, paper_r, show, exported
     OUT = setup()
 
-    paper_py("make_panels.py", ["figure2", "human_upstream", "agent_mcp_prompt"])
+    paper_py("fig2_ed1_ed2_ed3_make_panels.py", ["figure2", "human_upstream", "agent_mcp_prompt"])
     show("panel_tss_profile.png", harvest="fig2_ont")
 """
 from __future__ import annotations
@@ -33,7 +33,7 @@ def setup(outdir: str | Path | None = None) -> Path:
     """Point the paper's scripts at this repository and return the output directory."""
     global _OUT
     out = Path(outdir) if outdir else REPO / "figures"
-    # Absolute, always: ideogram_dmr_blue.R does setwd() before it draws, so a relative
+    # Absolute, always: ed4de_dmr_ideogram.R does setwd() before it draws, so a relative
     # output path stops meaning what the caller meant and cairo reports it as a write
     # failure, which reads like a graphics fault rather than a path one.
     _OUT = out.resolve()
@@ -117,7 +117,7 @@ def paper_r(script: str, args: list[str], env: dict | None = None) -> None:
 def harvest(prefix: str) -> int:
     """Move what a run wrote beside the run directory into the output directory.
 
-    make_panels.py writes to RUN/<figure2|figure3>/panels. The ONT arms and the PacBio arms
+    fig2_ed1_ed2_ed3_make_panels.py writes to RUN/<figure2|figure3>/panels. The ONT arms and the PacBio arms
     both use those names, so one overwrites the other unless each is collected and cleared
     before the next runs: the ONT TSS profile once came back with a PacBio column.
     """
@@ -134,9 +134,66 @@ def harvest(prefix: str) -> int:
     return n
 
 
+def name_for_paper(out_dir: Path | None = None) -> int:
+    """Rename what the cells wrote to the figure's name: panel_f_consensus -> fig1e_consensus_vs_wgbs.
+
+    The paper's scripts name a panel after what it draws; the figure gives it a letter. The
+    table that joins the two is panel_names.FIGURE_PANELS, the same one the batch render
+    uses, so a notebook run and a batch run leave identical names. Renders the paper does
+    not place go to other_renders/. Idempotent: called before every show().
+    """
+    from panel_names import FIGURE_PANELS, NOT_PLACED
+    o = Path(out_dir) if out_dir else out()
+    n = 0
+    for stem, (_fig, _panel, new) in FIGURE_PANELS.items():
+        if stem == new:
+            continue
+        for e in (".pdf", ".png"):
+            src = o / f"{stem}{e}"
+            if src.is_file():
+                src.replace(o / f"{new}{e}")
+                n += 1
+    for stem in NOT_PLACED:
+        for e in (".pdf", ".png"):
+            src = o / f"{stem}{e}"
+            if src.is_file():
+                (o / "other_renders").mkdir(exist_ok=True)
+                src.replace(o / "other_renders" / f"{stem}{e}")
+                n += 1
+    return n
+
+
+def tag(prefix: str, *names: str) -> None:
+    """Prefix files a script wrote without one, so name_for_paper() can place them.
+
+    The hexbin script writes panel_hexbin_human_vs_wgbs.png whether the arms are ONT or
+    PacBio; the batch render stages each call in its own directory and prefixes on collect.
+    A cell has no staging directory, so it tags right after the script returns.
+    """
+    for n in names:
+        stem = n.rsplit(".", 1)[0]
+        for ext in (".png", ".pdf"):
+            src = out() / f"{stem}{ext}"
+            if src.is_file():
+                src.replace(out() / f"{prefix}_{stem}{ext}")
+
+
+def paper_name(name: str, prefix: str | None = None) -> str:
+    """The figure-named file for what a script writes as `name` (with its harvest prefix)."""
+    from panel_names import FIGURE_PANELS, NOT_PLACED
+    stem, ext = name.rsplit(".", 1)
+    key = f"{prefix}_{stem}" if prefix else stem
+    if key in FIGURE_PANELS:
+        return f"{FIGURE_PANELS[key][2]}.{ext}"
+    if key in NOT_PLACED:
+        return f"other_renders/{key}.{ext}"
+    return f"{key}.{ext}"
+
+
 def show(*names: str, prefix: str | None = None, width: int | None = None) -> None:
     """Display panels the last call wrote. In a terminal, print where they are instead."""
-    paths = [out() / (f"{prefix}_{n}" if prefix else n) for n in names]
+    name_for_paper()
+    paths = [out() / paper_name(n, prefix) for n in names]
     try:
         from IPython.display import Image, display
     except ImportError:

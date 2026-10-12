@@ -18,7 +18,7 @@ takes ten to fifteen minutes; after that it starts in about half a minute.
     scripts/paper/ the panel scripts, as they are in the paper's repository
     data/          what each panel draws, 128 MB
     figures/all/   the batch render, each image named for the figure and panel it is
-    figures/       where a run of one notebook writes its PDFs and PNGs
+    figures/       where a run of one notebook writes its PDFs and PNGs, named for the figure
 
 | notebook | figure |
 | --- | --- |
@@ -37,8 +37,26 @@ running anything.
 
 ## The scripts
 
-Each cell holds the script that drew that panel, taken from the paper's repository. Edit a
-line and re-run and you get your edit.
+Each cell holds the script that drew that panel, taken from the paper's repository and
+named here for the display item it draws; a script that serves several items carries all
+of them in its name. Edit a line and re-run and you get your edit.
+
+| script (scripts/paper/) | draws |
+|---|---|
+| `fig1ef_consensus_panels.py` (+ `fig1ef_consensus_data.py`) | Fig. 1e, f |
+| `fig2_ed1_ed2_ed3_make_panels.py` (+ `fig2a_ed2a_ed3a_arm_panel.py`, `fig2a_ed2a_ed3a_arm_records.py`) | Fig. 2a, b; ED Fig. 1a; ED Fig. 2; ED Fig. 3 |
+| `fig2b_ed2b_hexbin_vs_wgbs.py` | Fig. 2b, ED Fig. 2b hexbins |
+| `fig2c_ed1c_ed3b_icr_panel.py` | Fig. 2c, ED Fig. 1c, ED Fig. 3b imprinting regions |
+| `fig2c_ed3b_gnas_region_plot.R` | Fig. 2c, ED Fig. 3b GNAS per haplotype (NanoMethViz) |
+| `ed1b_ed2a_ed3a_agent_cost.py` | ED Fig. 1b, ED Fig. 2a, ED Fig. 3a |
+| `ed4abc_hexbin.py` | ED Fig. 4a-c (the paper's script; here the exported hexagons are drawn, see below) |
+| `ed4de_dmr_ideogram.R` | ED Fig. 4d, e |
+| `ed5a_cpg_venn.py`, `ed5b_coverage_hist.py` | ED Fig. 5a, b |
+| `ed5c_hp_diff_by_region.R` | ED Fig. 5c |
+| `ed5de_icr_heatmaps.R` | ED Fig. 5d, e |
+| `ed5fg_tss_ctcf_profiles.py` | ED Fig. 5f, g |
+| `ed5h_region_hexbins.R` | ED Fig. 5h (as ED Fig. 4a-c, from exported hexagons) |
+| `nm_style.py`, `panel_style.py` | the journal's sizes and fonts, imported by the others |
 
 The four R panels are R cells: `rpy2`'s `%%R` magic runs them in the same kernel as the
 Python ones. Each differs from its file by one line, marked where it happens, because the
@@ -53,19 +71,21 @@ their own `hexbin()` call produced and exported, because the scripts for them re
 command line is shown, absolute paths on the shared filesystem read `$LONGVERSE` and
 `$RESULTS`.
 
-## The location
+## The names
 
-A panel script names its output after what it draws, because that is all it knows:
-`panel_f_consensus.png` is Figure 1e, and the novel imprinting heatmap is written by a script
-under `fig_ed4` and is Extended Data Fig. 5d. Both names are useful and they are kept apart:
+Every image is named for the figure and the panel it is: `fig1e_consensus_vs_wgbs.png`,
+`ed5c_hp_diff_by_region.png`. The paper's scripts name a file after what it draws, because
+that is all they know (`panel_f_consensus.png` is Figure 1e), so `scripts/panel_names.py`
+holds the table from the one name to the other, and both the notebooks and the batch
+render apply it before anything is shown or kept.
 
-    figures/all/       named for the figure: fig1e_consensus_vs_wgbs, ed5d_icr_novel_heatmap
-                       FIGURE_PANELS.tsv maps each one back to the name the script gave it
-    figures/notebook/  named by the script, because the cell above it is that script and
-                       the point of the notebook is that the two agree
-
-`figures/all/other_renders/` holds what the scripts produce that no figure places: the
-versions of a panel with both arms in one plot, where the paper draws one arm at a time.
+    figures/           what a run of the notebooks writes, figure-named; not committed
+    figures/all/       the same panels from the batch render on the paper's machine,
+                       committed; FIGURE_PANELS.tsv beside them lists each one with the
+                       name its script produced it under
+    figures/all/other_renders/   what the scripts produce that no figure places: the
+                       versions of a panel with both arms in one plot, where the paper
+                       draws one arm at a time
 
 ## The data
 

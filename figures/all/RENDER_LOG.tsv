@@ -1,30 +1,30 @@
 panel	drawn_by	outcome
 Fig 1e consensus	paper code	ok
 Fig 1f by coverage	paper code	ok
-ED5 d,e ICR heatmaps	paper code, R: icr_heatmap_nm.R	ok
-ED5 c HP difference	paper code, R: boxplot_nm.R	ok
-ED4 d ideogram ont	paper code, R: ideogram_dmr_blue.R	ok
-ED4 e ideogram pacbio	paper code, R: ideogram_dmr_blue.R	ok
-ED5 a Venn	paper code: venn_nm.py	ok
-ED5 b coverage histogram	paper code: coverage_hist_nm.py	ok
-ED5 f TSS profile	paper code: profile_nm.py	ok
-ED5 g CTCF profile	paper code: profile_nm.py	ok
-Fig 2b + ED1a ONT panels	paper code: make_panels.py	ok
-ED1 b cost, calling	paper code: make_cost_panel.py	ok
-ED1 b cost, phasing	paper code: make_cost_panel.py	ok
-ED1 c imprinting regions	paper code: make_icr_panel.py	ok
-Fig 2b hexbins vs WGBS	paper code: make_hexbin_panel.py	ok
-ED2 a cost	paper code: make_cost_panel.py	ok
-ED3 a cost	paper code: make_cost_panel.py	ok
-ED2 b hexbins vs WGBS	paper code: make_hexbin_panel.py	ok
-ED3 b imprinting regions	paper code: make_icr_panel.py	ok
-ED2 PacBio calling panels	paper code: make_panels.py	ok
-ED3 PacBio phasing panels	paper code: make_panels.py	ok
-Fig 2c GNAS human	paper code, R: modbam_region_plot.R	ok
-Fig 2c GNAS agent	paper code, R: modbam_region_plot.R	ok
-ED3 b GNAS human	paper code, R: modbam_region_plot.R	ok
-ED3 b GNAS agent	paper code, R: modbam_region_plot.R	ok
-GNAS region plot, ont	paper code, R: modbam_region_plot.R	ok
-GNAS region plot, pacbio	paper code, R: modbam_region_plot.R	ok
+ED5 d,e ICR heatmaps	paper code, R: ed5de_icr_heatmaps.R	ok
+ED5 c HP difference	paper code, R: ed5c_hp_diff_by_region.R	ok
+ED4 d ideogram ont	paper code, R: ed4de_dmr_ideogram.R	ok
+ED4 e ideogram pacbio	paper code, R: ed4de_dmr_ideogram.R	ok
+ED5 a Venn	paper code: ed5a_cpg_venn.py	ok
+ED5 b coverage histogram	paper code: ed5b_coverage_hist.py	ok
+ED5 f TSS profile	paper code: ed5fg_tss_ctcf_profiles.py	ok
+ED5 g CTCF profile	paper code: ed5fg_tss_ctcf_profiles.py	ok
+Fig 2b + ED1a ONT panels	paper code: fig2_ed1_ed2_ed3_make_panels.py	ok
+ED1 b cost, calling	paper code: ed1b_ed2a_ed3a_agent_cost.py	ok
+ED1 b cost, phasing	paper code: ed1b_ed2a_ed3a_agent_cost.py	ok
+ED1 c imprinting regions	paper code: fig2c_ed1c_ed3b_icr_panel.py	ok
+Fig 2b hexbins vs WGBS	paper code: fig2b_ed2b_hexbin_vs_wgbs.py	ok
+ED2 a cost	paper code: ed1b_ed2a_ed3a_agent_cost.py	ok
+ED3 a cost	paper code: ed1b_ed2a_ed3a_agent_cost.py	ok
+ED2 b hexbins vs WGBS	paper code: fig2b_ed2b_hexbin_vs_wgbs.py	ok
+ED3 b imprinting regions	paper code: fig2c_ed1c_ed3b_icr_panel.py	ok
+ED2 PacBio calling panels	paper code: fig2_ed1_ed2_ed3_make_panels.py	ok
+ED3 PacBio phasing panels	paper code: fig2_ed1_ed2_ed3_make_panels.py	ok
+Fig 2c GNAS human	paper code, R: fig2c_ed3b_gnas_region_plot.R	ok
+Fig 2c GNAS agent	paper code, R: fig2c_ed3b_gnas_region_plot.R	ok
+ED3 b GNAS human	paper code, R: fig2c_ed3b_gnas_region_plot.R	ok
+ED3 b GNAS agent	paper code, R: fig2c_ed3b_gnas_region_plot.R	ok
+GNAS region plot, ont	paper code, R: fig2c_ed3b_gnas_region_plot.R	ok
+GNAS region plot, pacbio	paper code, R: fig2c_ed3b_gnas_region_plot.R	ok
 ED4 a-c hexbins	exported hexagons	ok
 ED5 h region hexbins	exported hexagons	ok

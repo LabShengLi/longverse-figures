@@ -2,16 +2,16 @@
 # look reproduced when it had only been downloaded.
 figures/*.pdf
 figures/*.png
+figures/other_renders/
+figures/source_data/
+figures/RENDER_LOG.tsv
+figures/FIGURE_PANELS.tsv
 __pycache__/
 .ipynb_checkpoints/
 # Panels that the paper's scripts write beside their run directory. render_all.py collects
 # them into figures/; shipping both copies would make the repository look reproduced.
 data/runs/**/panels/
 
-# The notebooks ARE committed with their outputs, so the figures show on GitHub without
-# anyone running anything. scripts/clean_notebook_outputs.py strips the machine paths out
-# of those outputs first.
-figures/notebook/
 
 # NanoMethViz writes an RData alongside each region plot; it is 4 MB of plot object
 # that nothing in this repository reads.

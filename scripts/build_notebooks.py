@@ -30,6 +30,9 @@ from __future__ import annotations
 import ast
 import json
 import sys
+sys.path.insert(0, str(__import__('pathlib').Path(__file__).resolve().parent))
+from nbkit import paper_name  # noqa: E402
+import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -37,9 +40,9 @@ PAPER = HERE / "paper"
 
 SETUP = '''import sys; sys.path.insert(0, "../scripts"); sys.path.insert(0, "../scripts/paper")
 from pathlib import Path
-from nbkit import setup, paper_py, paper_r, run_r_source, harvest, show, have_r_package, DATA
+from nbkit import setup, paper_py, paper_r, run_r_source, harvest, tag, show, have_r_package, DATA
 
-OUT = setup("../figures/notebook")
+OUT = setup("../figures")
 print("panels will be written to", OUT)
 
 # %%R cells below run R natively in this kernel through rpy2, so the R panels are R code
@@ -103,13 +106,14 @@ def cell_func(module: str, func: str, call: str, shows: list[str], prefix=None) 
             f'_s = importlib.util.spec_from_file_location("{mod}", "../scripts/paper/{module}")\n'
             f'{mod} = importlib.util.module_from_spec(_s); _s.loader.exec_module({mod})\n'
             f'globals().update({{k: v for k, v in vars({mod}).items() if not k.startswith("__")}})\n\n')
-    show = ", ".join(f'"{s}"' for s in shows)
-    tail = f'\n\n{call}\nshow({show}{", prefix=" + repr(prefix) if prefix else ""})'
+    show = ", ".join(f'"{paper_name(s, prefix)}"' for s in shows)
+    tail = f'\n\n{call}\nshow({show})'
     return head + func_source(module, func) + tail
 
 
 def cell_script(script: str, argv: list[str], shows: list[str], prefix=None,
-                harvest_as: str | None = None) -> str:
+                harvest_as: str | None = None, tag_as: str | None = None,
+                tag_also: list[str] | None = None) -> str:
     args = ", ".join(_arg(a) for a in argv)
     # The scripts use __file__ to find their siblings. A notebook cell has no __file__,
     # so it is defined to the path the code was copied from: the same value it would have
@@ -122,8 +126,12 @@ def cell_script(script: str, argv: list[str], shows: list[str], prefix=None,
     tail = "\n\nmain()"
     if harvest_as:
         tail += f'\nprint(harvest({harvest_as!r}), "panels collected")'
-    show = ", ".join(f'"{s}"' for s in shows)
-    tail += f'\nshow({show}{", prefix=" + repr(prefix) if prefix else ""})'
+    if tag_as:
+        # everything the script wrote gets the prefix, including renders no figure places
+        tail += f'\ntag({tag_as!r}, ' + ", ".join(repr(x) for x in list(shows) + list(tag_also or [])) + ")"
+        prefix = tag_as
+    show = ", ".join(f'"{paper_name(s, prefix)}"' for s in shows)
+    tail += f'\nshow({show})'
     return head + body + tail
 
 
@@ -138,7 +146,7 @@ def cell_rsource_argparser(script: str, argv: list[str], env: dict, shows: list[
     def rv(v):
         if v.startswith("../data/"):
             return f'file.path(Sys.getenv("LV_DATA"), "{v[len("../data/"):]}")'
-        if v.startswith("../figures/notebook"):
+        if v.startswith("../figures"):
             return 'Sys.getenv("LV_OUT")'
         return f'"{v}"'
     args = ", ".join(rv(a) for a in argv)
@@ -177,7 +185,7 @@ def cell_rsource(script: str, argv: list[str], env: dict, shows: list[str]) -> s
     def rval0(v: str) -> str:
         if v.startswith("../data/"):
             return f'file.path(Sys.getenv("LV_DATA"), "{v[len("../data/"):]}")'
-        if v.startswith("../figures/notebook"):
+        if v.startswith("../figures"):
             return 'Sys.getenv("LV_OUT")'
         return f'"{v}"'
     args = ", ".join(rval0(a) for a in argv)
@@ -194,7 +202,7 @@ def cell_rsource(script: str, argv: list[str], env: dict, shows: list[str]) -> s
         # the notebook's directory and a relative path would resolve elsewhere.
         if v.startswith("../data/"):
             return f'file.path(Sys.getenv("LV_DATA"), "{v[len("../data/"):]}")'
-        if v.startswith("../figures/notebook"):
+        if v.startswith("../figures"):
             return 'Sys.getenv("LV_OUT")'
         return f'"{v}"'
 
@@ -227,7 +235,7 @@ def books() -> dict:
             "IDEOGRAM_LEGEND_KEY": "2", "IDEOGRAM_TITLE": "",
             "IDEOGRAM_LEGEND_POS": "bottom", "IDEOGRAM_POINT_SIZE": "0.0044"}
     MERGED = "../data/ed_fig4/hg002_ONT_Pacbio_merged_with_annotation.mincov5.inner.csv"
-    # Figure 1 e and f, from fig1_bc/10_render_ef_panels.sbatch. consensus_panels.py reads
+    # Figure 1 e and f, from fig1_bc/10_render_ef_panels.sbatch. fig1ef_consensus_panels.py reads
     # all three when it is imported, so they are set before the cell loads it. The width is
     # 3.35 and not 3.5 because the tight crop counts the legend above the axes into the
     # width, and at 3.5 the pair no longer fits the 183 mm page side by side.
@@ -248,12 +256,12 @@ The code in each cell is `scripts/paper/consensus_panels.py`, which is the paper
 ("## Figure 1e - three callers and their consensus\n\n"
  "Correlation on top, error below. The two do not rank the callers the same way: Rockfish "
  "edges LongVerse on r and loses to it on error, which is why the panel shows both.",
- FIG1_ENV + cell_func("consensus_panels.py", "panel_f_consensus",
+ FIG1_ENV + cell_func("fig1ef_consensus_panels.py", "panel_f_consensus",
            "panel_f_consensus()", ["panel_f_consensus.png"])),
 
 ("## Figure 1f - the same comparison by read depth\n\n"
  "The lower axis is where the consensus earns its keep.",
- FIG1_ENV + cell_func("consensus_panels.py", "panel_g_by_coverage",
+ FIG1_ENV + cell_func("fig1ef_consensus_panels.py", "panel_g_by_coverage",
            "panel_g_by_coverage()", ["panel_g_by_coverage.png"])),
 ]),
 
@@ -268,7 +276,7 @@ show different panels from that run.""", [
 ("## Figure 2b - the same evaluation applied to each arm\n\n"
  "`human_upstream` is the expert's run, `agent_mcp_prompt` the agent's. In the paper each "
  "arm sits in its own dashed frame holding two plots; these are the right-hand one of each.",
- cell_script("make_panels.py", ["figure2", "human_upstream", "agent_mcp_prompt"],
+ cell_script("fig2_ed1_ed2_ed3_make_panels.py", ["figure2", "human_upstream", "agent_mcp_prompt"],
              ["panel_tss_human.png", "panel_tss_agent.png"],
              prefix="fig2_ont", harvest_as="fig2_ont")),
 
@@ -278,26 +286,27 @@ show different panels from that run.""", [
  "per-site tables and the 540 MB bisulfite table, which this repository does not carry, so "
  "that half is not drawn here. What is below comes from the same pass as the cell above and "
  "is the measurement Extended Data Fig. 1a makes, both arms in one plot.",
- 'show("panel_wgbs_by_coverage.png", prefix="fig2_ont")'),
+ 'show("' + paper_name("panel_wgbs_by_coverage.png", "fig2_ont") + '")'),
 
 ("## Figure 2b - the other plot in each arm's frame, a per-site hexbin\n\n"
  "Every chromosome 20 site each arm called, against the bisulfite reference. The paper "
  "runs this on the whole bisulfite table; here it is the chromosome 20 slice of it, 13 MB "
  "instead of 515, which is the same sites because the arms only called chromosome 20.",
- cell_script("make_hexbin_panel.py",
+ cell_script("fig2b_ed2b_hexbin_vs_wgbs.py",
              ["{DATA}/hexbin_chr20/ont_human_chr20_persite_cov1.bed.gz",
               "{DATA}/hexbin_chr20/ont_agent_chr20_persite_cov1.bed.gz",
               "{DATA}/hexbin_chr20/wgbs_chr20.bismark.cov.gz", "{OUT}"],
-             ["panel_hexbin_human_vs_wgbs.png", "panel_hexbin_agent_vs_wgbs.png"])),
+             ["panel_hexbin_human_vs_wgbs.png", "panel_hexbin_agent_vs_wgbs.png"], tag_as="fig2_ont",
+             tag_also=["panel_hexbin_vs_wgbs.png", "panel_hexbin_human_vs_agent.png"])),
 
 ("## Figure 2c - GNAS per haplotype, the expert's run\n\n"
  "NanoMethViz on that arm's own phased reads, cut to the window the panel draws. The "
  "whole phased BAMs are 1.8 GB per haplotype; this window is 25 kb.",
- cell_rsource_argparser("modbam_region_plot.R", ["--hp1_bam", "../data/gnas_arms/fig2c_ont_human_HP1.bam", "--hp2_bam", "../data/gnas_arms/fig2c_ont_human_HP2.bam", "--chr", "chr20", "--start", "60622123", "--end", "60626697", "--flank", "3000", "--gtf_file", "../data/icr_bam/hs1.ncbiRefSeq.icr.gtf", "--outdir", "../figures/notebook", "--outfn_prefix", "fig2c_human", "--tagname", "GNAS", "--fig_w", "7", "--fig_h", "6", "--png"], {}, ["fig2c_human_GNAS.png"])),
+ cell_rsource_argparser("fig2c_ed3b_gnas_region_plot.R", ["--hp1_bam", "../data/gnas_arms/fig2c_ont_human_HP1.bam", "--hp2_bam", "../data/gnas_arms/fig2c_ont_human_HP2.bam", "--chr", "chr20", "--start", "60622123", "--end", "60626697", "--flank", "3000", "--gtf_file", "../data/icr_bam/hs1.ncbiRefSeq.icr.gtf", "--outdir", "../figures", "--outfn_prefix", "fig2c_human", "--tagname", "GNAS", "--fig_w", "7", "--fig_h", "6", "--png"], {}, ["fig2c_human_GNAS.png"])),
 
 ("## Figure 2c - the same window, the agent's run\n\n"
  "Same script, same window, the other arm's reads.",
- cell_rsource_argparser("modbam_region_plot.R", ["--hp1_bam", "../data/gnas_arms/fig2c_ont_agent_HP1.bam", "--hp2_bam", "../data/gnas_arms/fig2c_ont_agent_HP2.bam", "--chr", "chr20", "--start", "60622123", "--end", "60626697", "--flank", "3000", "--gtf_file", "../data/icr_bam/hs1.ncbiRefSeq.icr.gtf", "--outdir", "../figures/notebook", "--outfn_prefix", "fig2c_agent", "--tagname", "GNAS", "--fig_w", "7", "--fig_h", "6", "--png"], {}, ["fig2c_agent_GNAS.png"])),
+ cell_rsource_argparser("fig2c_ed3b_gnas_region_plot.R", ["--hp1_bam", "../data/gnas_arms/fig2c_ont_agent_HP1.bam", "--hp2_bam", "../data/gnas_arms/fig2c_ont_agent_HP2.bam", "--chr", "chr20", "--start", "60622123", "--end", "60626697", "--flank", "3000", "--gtf_file", "../data/icr_bam/hs1.ncbiRefSeq.icr.gtf", "--outdir", "../figures", "--outfn_prefix", "fig2c_agent", "--tagname", "GNAS", "--fig_w", "7", "--fig_h", "6", "--png"], {}, ["fig2c_agent_GNAS.png"])),
 
 ("## Figure 2a - what the two arms were given\n\n"
  "In the paper this panel is native PowerPoint text, so the commands stay selectable. "
@@ -325,16 +334,16 @@ The cost chart is `scripts/paper/make_cost_panel.py` and the imprinting chart is
 `scripts/paper/make_icr_panel.py`, both inlined below.""", [
 
 ("## a - agreement with the bisulfite reference, each arm separately",
- cell_script("make_panels.py", ["figure2", "human_upstream", "agent_mcp_prompt"],
+ cell_script("fig2_ed1_ed2_ed3_make_panels.py", ["figure2", "human_upstream", "agent_mcp_prompt"],
              ["panel_wgbs_cov_human.png", "panel_wgbs_cov_agent.png"],
              prefix="ed1", harvest_as="ed1")),
 
 ("## b - tokens, cost and time against compute, the calling run",
- cell_script("make_cost_panel.py", ["figure2", "upstream_mcp_prompt"],
+ cell_script("ed1b_ed2a_ed3a_agent_cost.py", ["figure2", "upstream_mcp_prompt"],
              ["panel_agent_cost.png"], prefix="ed1_calling", harvest_as="ed1_calling")),
 
 ("## b - the same for the phasing run",
- cell_script("make_cost_panel.py", ["figure3", "phasing_mcp_prompt"],
+ cell_script("ed1b_ed2a_ed3a_agent_cost.py", ["figure3", "phasing_mcp_prompt"],
              ["panel_agent_cost.png"], prefix="ed1_phasing", harvest_as="ed1_phasing")),
 
 ("## c - the imprinting control regions on chromosome 20, one plot per arm\n\n"
@@ -343,7 +352,7 @@ The cost chart is `scripts/paper/make_cost_panel.py` and the imprinting chart is
  "unmethylated, and a failed haplotype split would show both near the middle. The two "
  "arms are drawn on the same axis and in the same row order, so a difference between the "
  "two pictures would be a difference in the data. Both runs wrote the same numbers.",
- cell_script("make_icr_panel.py",
+ cell_script("fig2c_ed1c_ed3b_icr_panel.py",
              ["{DATA}/ed_fig1/c_icr_human_phasing.csv",
               "{DATA}/ed_fig1/c_icr_agent_phasing.csv", "{OUT}"],
              ["panel_icr_human.png", "panel_icr_agent.png"])),
@@ -354,30 +363,31 @@ The cost chart is `scripts/paper/make_cost_panel.py` and the imprinting chart is
 PacBio methylation calling, agent against expert, chromosome 20.
 
 The paper runs this through an orchestrator that stages a run tree and a 540 MB bisulfite
-table first. What draws is `make_panels.py`, the same script as Figure 2, so it is called
+table first. What draws is `fig2_ed1_ed2_ed3_make_panels.py`, the same script as Figure 2, so it is called
 here with the PacBio labels.""", [
 
 ("## The two PacBio calling arms\n\n"
  "The same script as Figure 2, inlined again here so this notebook reads on its own, "
  "with the PacBio labels and PANEL_PLATFORM set so the axes say PacBio.",
  'import os\nos.environ["PANEL_PLATFORM"] = "PacBio"\n\n'
- + cell_script("make_panels.py", ["figure2", "supp3_human", "supp3_agent"],
+ + cell_script("fig2_ed1_ed2_ed3_make_panels.py", ["figure2", "supp3_human", "supp3_agent"],
                ["panel_tss_profile.png"], prefix="ed2", harvest_as="ed2")),
 
 ("## b - agreement with the bisulfite reference by read depth\n\n"
  "Another panel from the same pass as the cell above.",
- 'show("panel_wgbs_by_coverage.png", prefix="ed2")'),
+ 'show("' + paper_name("panel_wgbs_by_coverage.png", "ed2") + '")'),
 
 ("## b - the per-site hexbins, the other plot in each arm's frame",
  'import os\nos.environ["PANEL_PLATFORM"] = "PacBio"\n\n'
- + cell_script("make_hexbin_panel.py",
+ + cell_script("fig2b_ed2b_hexbin_vs_wgbs.py",
                ["{DATA}/hexbin_chr20/pacbio_human_chr20_persite_cov1.bed.gz",
                 "{DATA}/hexbin_chr20/pacbio_agent_chr20_persite_cov1.bed.gz",
                 "{DATA}/hexbin_chr20/wgbs_chr20.bismark.cov.gz", "{OUT}"],
-               ["panel_hexbin_human_vs_wgbs.png", "panel_hexbin_agent_vs_wgbs.png"])),
+               ["panel_hexbin_human_vs_wgbs.png", "panel_hexbin_agent_vs_wgbs.png"], tag_as="ed2_pacbio",
+             tag_also=["panel_hexbin_vs_wgbs.png", "panel_hexbin_human_vs_agent.png"])),
 
 ("## a - what the agent consumed on this run",
- cell_script("make_cost_panel.py", ["ed2_cost", "pacbio_calling"],
+ cell_script("ed1b_ed2a_ed3a_agent_cost.py", ["ed2_cost", "pacbio_calling"],
              ["panel_agent_cost.png"], prefix="ed2_cost", harvest_as="ed2_cost")),
 ]),
 
@@ -388,25 +398,25 @@ PacBio phasing and per-haplotype methylation, the expert's run against the agent
 ("## The two PacBio phasing arms\n\n"
  "The same script again, on the phasing arms.",
  'import os\nos.environ["PANEL_PLATFORM"] = "PacBio"\n\n'
- + cell_script("make_panels.py", ["figure3", "supp4_human", "supp4_agent"],
+ + cell_script("fig2_ed1_ed2_ed3_make_panels.py", ["figure3", "supp4_human", "supp4_agent"],
                ["panel_icr_haplotype.png"], prefix="ed3", harvest_as="ed3")),
 
 ("## a - what the agent consumed on this run",
- cell_script("make_cost_panel.py", ["ed3_cost", "pacbio_phasing"],
+ cell_script("ed1b_ed2a_ed3a_agent_cost.py", ["ed3_cost", "pacbio_phasing"],
              ["panel_agent_cost.png"], prefix="ed3_cost", harvest_as="ed3_cost")),
 
 ("## b - the imprinting control regions on chromosome 20, one plot per arm\n\n"
  "Two per-region tables of 576 bytes, one from each arm's own phasing run.",
- cell_script("make_icr_panel.py",
+ cell_script("fig2c_ed1c_ed3b_icr_panel.py",
              ["{DATA}/ed_fig3/b_icr_human_phasing.csv",
               "{DATA}/ed_fig3/b_icr_agent_phasing.csv", "{OUT}"],
-             ["panel_icr_human.png", "panel_icr_agent.png"])),
+             ["panel_icr_human.png", "panel_icr_agent.png"], tag_as="ed3_pacbio")),
 
 ("## b - GNAS per haplotype, the expert's run",
- cell_rsource_argparser("modbam_region_plot.R", ["--hp1_bam", "../data/gnas_arms/ed3b_pacbio_human_HP1.bam", "--hp2_bam", "../data/gnas_arms/ed3b_pacbio_human_HP2.bam", "--chr", "chr20", "--start", "60622123", "--end", "60626697", "--flank", "3000", "--gtf_file", "../data/icr_bam/hs1.ncbiRefSeq.icr.gtf", "--outdir", "../figures/notebook", "--outfn_prefix", "ed3b_human", "--tagname", "GNAS", "--fig_w", "7", "--fig_h", "6", "--png"], {}, ["ed3b_human_GNAS.png"])),
+ cell_rsource_argparser("fig2c_ed3b_gnas_region_plot.R", ["--hp1_bam", "../data/gnas_arms/ed3b_pacbio_human_HP1.bam", "--hp2_bam", "../data/gnas_arms/ed3b_pacbio_human_HP2.bam", "--chr", "chr20", "--start", "60622123", "--end", "60626697", "--flank", "3000", "--gtf_file", "../data/icr_bam/hs1.ncbiRefSeq.icr.gtf", "--outdir", "../figures", "--outfn_prefix", "ed3b_human", "--tagname", "GNAS", "--fig_w", "7", "--fig_h", "6", "--png"], {}, ["ed3b_human_GNAS.png"])),
 
 ("## b - the same window, the agent's run",
- cell_rsource_argparser("modbam_region_plot.R", ["--hp1_bam", "../data/gnas_arms/ed3b_pacbio_agent_HP1.bam", "--hp2_bam", "../data/gnas_arms/ed3b_pacbio_agent_HP2.bam", "--chr", "chr20", "--start", "60622123", "--end", "60626697", "--flank", "3000", "--gtf_file", "../data/icr_bam/hs1.ncbiRefSeq.icr.gtf", "--outdir", "../figures/notebook", "--outfn_prefix", "ed3b_agent", "--tagname", "GNAS", "--fig_w", "7", "--fig_h", "6", "--png"], {}, ["ed3b_agent_GNAS.png"])),
+ cell_rsource_argparser("fig2c_ed3b_gnas_region_plot.R", ["--hp1_bam", "../data/gnas_arms/ed3b_pacbio_agent_HP1.bam", "--hp2_bam", "../data/gnas_arms/ed3b_pacbio_agent_HP2.bam", "--chr", "chr20", "--start", "60622123", "--end", "60626697", "--flank", "3000", "--gtf_file", "../data/icr_bam/hs1.ncbiRefSeq.icr.gtf", "--outdir", "../figures", "--outfn_prefix", "ed3b_agent", "--tagname", "GNAS", "--fig_w", "7", "--fig_h", "6", "--png"], {}, ["ed3b_agent_GNAS.png"])),
 ]),
 
 "06_extended_data_fig4": ("""# Extended Data Fig. 4
@@ -446,15 +456,15 @@ show("ed4abc_hexbins.png")'''),
  "Drawn at the published cutoff: |HP1 - HP2| at least 50 percentage points, q at most "
  "0.01. The input holds the DMRs that already clear it, 45,339 of 2.6 million tiles; the "
  "script filters again at the same threshold, so what it draws is unchanged.",
- cell_rsource("ideogram_dmr_blue.R",
-              ["ont", "../figures/notebook"],
+ cell_rsource("ed4de_dmr_ideogram.R",
+              ["ont", "../figures"],
               {**IDEO, "IDEOGRAM_WDIR": "../data/ed_fig4/dmr/ont"},
               ["Ideogram_dmr_t2t_hg002_ont_blue.png"])),
 
 ("## e - the same for PacBio\n\n"
  "The same script, the other platform's DMR table.",
- cell_rsource("ideogram_dmr_blue.R",
-              ["pacbio", "../figures/notebook"],
+ cell_rsource("ed4de_dmr_ideogram.R",
+              ["pacbio", "../figures"],
               {**IDEO, "IDEOGRAM_WDIR": "../data/ed_fig4/dmr/pacbio"},
               ["Ideogram_dmr_t2t_hg002_pacbio_blue.png"])),
 
@@ -465,18 +475,18 @@ show("ed4abc_hexbins.png")'''),
 Coverage and regional agreement between ONT and PacBio.""", [
 
 ("## a - CpG sites covered at five or more reads by each platform",
- cell_script("venn_nm.py",
+ cell_script("ed5a_cpg_venn.py",
              ["{DATA}/ed_fig5/A_venn_covered_cpg_cov5_stats.tsv", "{OUT}/venn_cov5_nm"],
              ["venn_cov5_nm.png"])),
 
 ("## b - per-site coverage distributions\n\n"
  "Drawn over the whole distribution with the coverage-5 threshold marked. Truncating "
  "there would hide the left tail the panel is about.",
- cell_script("coverage_hist_nm.py", ["{DATA}/ed_fig5", "{OUT}/coverage_hist_nm"],
+ cell_script("ed5b_coverage_hist.py", ["{DATA}/ed_fig5", "{OUT}/coverage_hist_nm"],
              ["coverage_hist_nm.png"])),
 
 ("## c - haplotype difference by region set, with paired Wilcoxon tests",
- cell_rsource("boxplot_nm.R", [MERGED, "../figures/notebook"], {"ICR_BASE_PT": "7"},
+ cell_rsource("ed5c_hp_diff_by_region.R", [MERGED, "../figures"], {"ICR_BASE_PT": "7"},
               ["hp_diff_by_region_nm.png"])),
 
 ("## d, e - imprinting control regions, HP1 minus HP2\n\n"
@@ -485,19 +495,19 @@ Coverage and regional agreement between ONT and PacBio.""", [
  "stops it rather than producing a plausible figure. The input lives under `data/ed_fig4/` "
  "because these two panels were f and g of Extended Data Fig. 4 until 2026-10-03; the "
  "paper's own build reads them from that directory too.",
- cell_rsource("icr_heatmap_nm.R",
-              [MERGED, "../data/ed_fig4", "../figures/notebook"],
+ cell_rsource("ed5de_icr_heatmaps.R",
+              [MERGED, "../data/ed_fig4", "../figures"],
               {"ICR_BASE_PT": "7"},
               ["icr_heatmap_novel_nm.png", "icr_heatmap_known_nm.png"])),
 
 ("## f - methylation around transcription start sites, three platforms",
- cell_script("profile_nm.py",
+ cell_script("ed5fg_tss_ctcf_profiles.py",
              ["{DATA}/ed_fig5/TSS_profile_3track_nozero_data.tsv",
               "{OUT}/tss_profile_nm", "TSS", "2000"],
              ["tss_profile_nm.png"])),
 
 ("## g - CTCF, the same script with the other input",
- cell_script("profile_nm.py",
+ cell_script("ed5fg_tss_ctcf_profiles.py",
              ["{DATA}/ed_fig5/CTCF_profile_3track_nozero_data.tsv",
               "{OUT}/ctcf_profile_nm", "CTCF site", "2000"],
              ["ctcf_profile_nm.png"])),
@@ -541,11 +551,11 @@ cell says which of the two you are looking at.''', [
 ("## GNAS, ONT\n\n"
  "The paper's NanoMethViz script, inlined. `parse_args` is given its arguments "
  "directly because a notebook has no command line; that one line is marked in the code.",
- cell_rsource_argparser("modbam_region_plot.R", ['--hp1_bam', '../data/icr_bam/hg002_ont_icr_HP1.bam', '--hp2_bam', '../data/icr_bam/hg002_ont_icr_HP2.bam', '--chr', 'chr20', '--start', '60617123', '--end', '60644527', '--gtf_file', '../data/icr_bam/hs1.ncbiRefSeq.icr.gtf', '--outdir', '../figures/notebook', '--outfn_prefix', 'gnas_ont', '--fig_w', '7', '--fig_h', '6', '--png'], {}, ["gnas_ont_20_60617123_60644527.png"])),
+ cell_rsource_argparser("fig2c_ed3b_gnas_region_plot.R", ['--hp1_bam', '../data/icr_bam/hg002_ont_icr_HP1.bam', '--hp2_bam', '../data/icr_bam/hg002_ont_icr_HP2.bam', '--chr', 'chr20', '--start', '60617123', '--end', '60644527', '--gtf_file', '../data/icr_bam/hs1.ncbiRefSeq.icr.gtf', '--outdir', '../figures/notebook', '--outfn_prefix', 'gnas_ont', '--fig_w', '7', '--fig_h', '6', '--png'], {}, ["gnas_ont_20_60617123_60644527.png"])),
 
 ("## GNAS, PacBio\n\n"
  "The same script, the other platform's reads.",
- cell_rsource_argparser("modbam_region_plot.R", ['--hp1_bam', '../data/icr_bam/hg002_pacbio_icr_HP1.bam', '--hp2_bam', '../data/icr_bam/hg002_pacbio_icr_HP2.bam', '--chr', 'chr20', '--start', '60617123', '--end', '60644527', '--gtf_file', '../data/icr_bam/hs1.ncbiRefSeq.icr.gtf', '--outdir', '../figures/notebook', '--outfn_prefix', 'gnas_pacbio', '--fig_w', '7', '--fig_h', '6', '--png'], {}, ["gnas_pacbio_20_60617123_60644527.png"])),
+ cell_rsource_argparser("fig2c_ed3b_gnas_region_plot.R", ['--hp1_bam', '../data/icr_bam/hg002_pacbio_icr_HP1.bam', '--hp2_bam', '../data/icr_bam/hg002_pacbio_icr_HP2.bam', '--chr', 'chr20', '--start', '60617123', '--end', '60644527', '--gtf_file', '../data/icr_bam/hs1.ncbiRefSeq.icr.gtf', '--outdir', '../figures/notebook', '--outfn_prefix', 'gnas_pacbio', '--fig_w', '7', '--fig_h', '6', '--png'], {}, ["gnas_pacbio_20_60617123_60644527.png"])),
 
 ("## If NanoMethViz is not here\n\n"
  "The figures the paper's own run produced, included so the repository shows every "
@@ -609,7 +619,7 @@ def main(outdir="notebooks", check=False):
             for _h, c in panels:
                 if isinstance(c, tuple):
                     want += [code(c[0])["source"],
-                             code("show(" + ", ".join(repr(x) for x in c[1]) + ")")["source"]]
+                             code("show(" + ", ".join(repr(paper_name(x)) for x in c[1]) + ")")["source"]]
                 else:
                     want.append(code(c)["source"])
             got = [c["source"] for c in have["cells"] if c["cell_type"] == "code"][1:]
@@ -626,7 +636,7 @@ def main(outdir="notebooks", check=False):
     # next trips over, which is what happened here: ggsave's `units` was still bound from
     # an earlier panel. render_all.py starts a process per script, so it is the faithful
     # way to draw everything at once.
-    everything = [md("# Every figure, in one run\n\nThis runs `scripts/render_all.py`, which starts a fresh process per script, exactly as\nthe paper does. To read the code that draws a figure, open that figure's own notebook:\nthe code is in the cells there.\n"), code('import subprocess, sys\nr = subprocess.run([sys.executable, "../scripts/render_all.py", "../figures/notebook"],\n                   capture_output=True, text=True)\nprint(r.stdout[-4000:])\nif r.returncode != 0:\n    print("STDERR:", r.stderr[-1500:])'), code('import pandas as pd\nfrom IPython.display import display, Markdown\nlog = pd.read_csv("../figures/notebook/RENDER_LOG.tsv", sep="\\t")\ndisplay(Markdown("### What drew each panel"))\ndisplay(log)'), code('from IPython.display import Image, display, Markdown\nfrom pathlib import Path\nfor p in sorted(Path("../figures/notebook").glob("*.png")):\n    display(Markdown(f"**{p.name}**"))\n    display(Image(filename=str(p)))')]
+    everything = [md("# Every figure, in one run\n\nThis runs `scripts/render_all.py`, which starts a fresh process per script, exactly as\nthe paper does. To read the code that draws a figure, open that figure's own notebook:\nthe code is in the cells there.\n"), code('import subprocess, sys\nr = subprocess.run([sys.executable, "../scripts/render_all.py", "../figures"],\n                   capture_output=True, text=True)\nprint(r.stdout[-4000:])\nif r.returncode != 0:\n    print("STDERR:", r.stderr[-1500:])'), code('import pandas as pd\nfrom IPython.display import display, Markdown\nlog = pd.read_csv("../figures/notebook/RENDER_LOG.tsv", sep="\\t")\ndisplay(Markdown("### What drew each panel"))\ndisplay(log)'), code('from IPython.display import Image, display, Markdown\nfrom pathlib import Path\nfor p in sorted(Path("../figures").glob("*.png")):\n    display(Markdown(f"**{p.name}**"))\n    display(Image(filename=str(p)))')]
     for name, (intro, panels) in B.items():
         cells = [md(intro), code(SETUP)]
     # A %%R cell is R all the way down, so the panel it wrote is displayed by a Python
@@ -637,7 +647,7 @@ def main(outdir="notebooks", check=False):
             if isinstance(body, tuple):
                 rcode, shows = body
                 cells += [md(heading), code(rcode),
-                          code("show(" + ", ".join(repr(x) for x in shows) + ")")]
+                          code("show(" + ", ".join(repr(paper_name(x)) for x in shows) + ")")]
             else:
                 cells += [md(heading), code(body)]
         (out / f"{name}.ipynb").write_text(json.dumps(nb(cells), indent=1))
