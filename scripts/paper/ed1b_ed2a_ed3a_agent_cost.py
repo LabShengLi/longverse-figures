@@ -56,22 +56,21 @@ def main() -> int:
     # "tools_only" on its own was read as the command line arm, which it is not: all three
     # of these are the agent, differing only in how much it is told. The human arm types a
     # command and spends no tokens at all, so it has no bar here and is stated instead.
-    # Named for what the agent was given, not for the switch in the harness. "Paper2Agent
-    # MCP" was considered and rejected: Paper2Agent is another group's system, and labelling
-    # an arm with it invites the reader to think that system was run here. What was run is
-    # this project's own MCP server; only the prompt layer follows the Paper2Agent design,
-    # and that belongs in the text rather than on an axis.
-    # Two arms, two labels, both short enough for an axis:
+    # Named for what the agent was given, not for the switch in the harness. The arm the
+    # paper reports is labelled "Agent", the name the main text, Fig. 2 and Extended Data
+    # Figs. 2 and 3 use for it (author's instruction, 2026-10-12; it was "Paper2Agent"
+    # before, which named the design of its prompt layer rather than the arm). Nothing of
+    # Paper2Agent's own code was run, so that name belongs in the text, not on an axis.
+    # The other two arms keep their short names:
     #   MCP           this project's MCP server, tools attached and nothing else said
-    #   Paper2Agent   the same server with its own prompt surfaced, which is the pattern
-    #                 the Paper2Agent paper describes
-    # The label names a design, not a piece of software that was executed here. Nothing of
-    # Paper2Agent's own code was run, so the figure caption says so in words; putting that
-    # qualification on the axis would make the axis unreadable.
+    #   MCP + hint    the same server with the inspect hint added
     PRETTY = {
         "tools_only":  "MCP",
         "with_prompt": "MCP\n+ inspect hint",
-        "mcp_prompt":  "Paper2Agent",
+        "mcp_prompt":  "Agent",
+        # the PacBio tasks of Extended Data Figs. 2 and 3, one agent arm each
+        "pacbio_calling": "Agent",
+        "pacbio_phasing": "Agent",
     }
     names = [PRETTY.get(r["run_id"].replace("upstream_", "").replace("phasing_", ""),
                         r["run_id"]) for r in runs]
