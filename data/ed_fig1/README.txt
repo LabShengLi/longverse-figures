@@ -6,7 +6,7 @@ the previous README was the fig1 text copied unchanged and described the wrong f
 
 Extended Data Fig. 1, the remaining ONT panels for the same two runs as Fig. 2.
 
-  a  a_wgbs_by_coverage.csv (Supplementary Table S7)
+  a  a_wgbs_by_coverage.csv (Supplementary Table S4)
      agreement with WGBS by read-depth bin, each arm, basecalling run
   b  b_calling_agent_cost.csv, b_phasing_agent_cost.csv, b_compute_minutes_detail.json
      the agent's tokens, cost and conversation time against the compute each run set off

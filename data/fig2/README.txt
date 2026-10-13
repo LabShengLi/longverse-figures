@@ -10,9 +10,9 @@ Fig. 2, one sentence reproduces the expert, HG002 ONT chromosome 20.
      the expert's command and the agent's sentence, tool order, tasks, turns, tokens, cost;
      drawn straight from these records by arm_panel_a.py (prompt box + step table), so panel a
      has no CSV and is not listed in PANEL_NAMES.tsv, which lists rendered panel PDFs only
-  b  b_persite_vs_wgbs.csv, b_tss_profile.csv (Supplementary Table S5)
+  b  b_persite_vs_wgbs.csv, b_tss_profile.csv (Supplementary Table S2)
      each arm's calls against WGBS at coverage >= 5, and mean methylation in 50 bp bins at TSS
-  c  c_icr_*.csv (Supplementary Table S6); the GNAS region panels read the chr20 haplotype
+  c  c_icr_*.csv (Supplementary Table S3); the GNAS region panels read the chr20 haplotype
      BAM subsets in data/icr_bam/, and the two arms' panels are byte-identical (md5 in the legend)
 
 Upstream: $RESULTS/2026_09_25_longverse_agent_benchmark/ (pipeline_runs/{agent,human}/
