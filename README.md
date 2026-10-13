@@ -49,6 +49,7 @@ of them in its name. Edit a line and re-run and you get your edit.
 | `fig2c_ed1c_ed3b_icr_panel.py` | Fig. 2c, ED Fig. 1c, ED Fig. 3b imprinting regions |
 | `fig2c_ed3b_gnas_region_plot.R` | Fig. 2c, ED Fig. 3b GNAS per haplotype (NanoMethViz) |
 | `ed1b_ed2a_ed3a_agent_cost.py` | ED Fig. 1b, ED Fig. 2a, ED Fig. 3a |
+| `ed2_render_panels.py`, `ed3_render_panels.py` | the paper's drivers that render the PacBio arms' panels for ED Fig. 2 and ED Fig. 3 in one pass; kept for the record, the notebooks call the panel scripts directly |
 | `ed4abc_hexbin.py` | ED Fig. 4a-c (the paper's script; here the exported hexagons are drawn, see below) |
 | `ed4de_dmr_ideogram.R` | ED Fig. 4d, e |
 | `ed5a_cpg_venn.py`, `ed5b_coverage_hist.py` | ED Fig. 5a, b |
